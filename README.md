@@ -8,14 +8,30 @@ Game booth 3D side-scroller. Berjalan offline, tanpa internet dan tanpa server.
 3. Tekan **F** untuk layar penuh (16:9, cocok 1280x720 dan 1920x1080).
 
 ## Kontrol
-SPACE / panah atas = lompat, panah bawah = slide, P / ESC = pause, F = layar penuh, M = bisukan.
+`SPACE` / panah atas = lompat, panah bawah = slide, `P` / `ESC` = pause, `F` = layar penuh, `M` = bisukan.
 
-## Pengaturan panitia
-Semua angka ada di `js/config.js`: kecepatan, bobot loot, combo, boss, dan `REWARDS` (skor minimum dan stok tiap hadiah).
-Setelah mengubah file di `js/`, jalankan `npm install` (sekali) lalu `npm run build` untuk membuat ulang `dist/` dan file satu-file.
-- `PLASVORA_URL`: isi tautan untuk tombol EXPLORE PLASVORA (kosong = tampil info singkat).
-- Panel admin: SETTINGS > ADMIN, PIN awal `1234` (`ADMIN_PIN`). Isinya sisa stok, reset stok, hapus leaderboard.
-- Leaderboard, stok, dan kode klaim tersimpan di localStorage browser yang sama. Pakai satu laptop dan satu browser selama pameran.
+## Struktur Rank & 2 Hadiah Booth
+| Rank | Skor Minimum | Status / Hadiah | Label | Stok Default |
+| --- | ---: | --- | --- | ---: |
+| ECO ROOKIE | 0 | Progress | — | — |
+| ECO HERO | 1.000 | Progress | — | — |
+| ECO GUARDIAN | 2.500 | Progress | — | — |
+| **🟢 ECO LEGEND** | **5.000** | **Sticker Limited (Sticker Plasvora Limited)** | `LIMITED STICKER` | `5 / 5` |
+| **🏆 ECO CHAMPION** | **8.000+** | **HADIAH UTAMA BOOTH** | `HADIAH UTAMA BOOTH` | `1 / 1` |
 
-## Struktur
-index.html, css/style.css, js/ (main, config, game, player, spawner, loot, collision, score, reward, leaderboard, input, audio, effects, ui, storage, models, world, util, states), assets/ (opsional).
+## Admin Booth & Mode Manual (Terminal)
+- Panel admin di dalam game: **SETTINGS > ADMIN**, PIN awal `1234` (`ADMIN_PIN` di `js/config.js`).
+- Tabel Admin Booth hanya menampilkan 2 tier hadiah fisik (`ECO LEGEND` dan `ECO CHAMPION`).
+- Semua konfigurasi rank, hadiah, stok default, dan revisi data tersimpan di `js/booth-config.js`.
+- **Admin Manual Mode (Terminal):** perubahan manual dilakukan secara sadar oleh admin dan setiap command ubah/reset meminta konfirmasi manual (`YA`) sebelum mengubah data booth:
+  - `npm run admin` — tampilkan panduan & daftar command (read-only)
+  - `npm run admin:status` — lihat konfigurasi 2 hadiah booth & stok default (read-only)
+  - `npm run admin:set-stock legend 5`
+  - `npm run admin:set-stock champion 1`
+  - `npm run admin:set-score <legend|champion> <skor>`
+  - `npm run admin:set-reward <legend|champion> "<nama hadiah>"`
+  - `npm run admin:reset-stock` — reset stok hadiah booth (butuh konfirmasi)
+  - `npm run admin:reset-claims` — reset riwayat klaim (butuh konfirmasi)
+  - `npm run admin:reset-leaderboard` — reset leaderboard (butuh konfirmasi)
+- Setelah mengubah file di `js/`, jalankan `npm run build` untuk membuat ulang `dist/` dan `PLASVORA-ECO-RUNNER-satu-file.html`.
+- Leaderboard, stok, dan kode klaim tersimpan di `localStorage` browser yang sama. Pakai satu laptop dan satu browser selama pameran.

@@ -5,7 +5,8 @@ export const KEYS = {
   LB: 'plasvora3d_leaderboard_v1',
   SETTINGS: 'plasvora3d_settings_v1',
   STOCK: 'plasvora3d_stock_v1',
-  CLAIMS: 'plasvora3d_claims_v1'
+  CLAIMS: 'plasvora3d_claims_v1',
+  REVS: 'plasvora3d_revs_v1'
 };
 
 export const Storage = {

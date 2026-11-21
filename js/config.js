@@ -1,5 +1,6 @@
 // config.js - semua angka yang boleh diubah panitia booth ada di sini.
 // Tidak perlu menyentuh logika game untuk mengatur hadiah, stok, atau tingkat kesulitan.
+import { BOOTH_CONFIG } from './booth-config.js';
 
 export const C = {
   // Isi dengan alamat website Plasvora agar tombol EXPLORE PLASVORA membukanya.
@@ -179,26 +180,31 @@ export const C = {
     car:       { need: 'jump',  tier: 'hard',   size: 'long',   hitW: 2.75, hitH: 1.38, hitY: 0.69, hitDx: 0, warning: true,  name: 'Mobil bekas' }
   },
 
-  // Hadiah booth & target skor baru (ECO CHAMPION 8.000+ = hadiah utama booth)
-  REWARDS: {
-    hero:     { minScore: 1000, stock: 30, rank: 'ECO HERO',     prize: 'Stiker ECO HERO' },
-    guardian: { minScore: 2500, stock: 15, rank: 'ECO GUARDIAN', prize: 'Stiker ECO GUARDIAN' },
-    legend:   { minScore: 5000, stock: 6,  rank: 'ECO LEGEND',   prize: 'Stiker ECO LEGEND' },
-    champion: { minScore: 8000, stock: 2,  rank: 'ECO CHAMPION', prize: 'STIKER ECO CHAMPION — HADIAH UTAMA' }
-  },
+  // Rank progress (tanpa hadiah fisik) & 2 tier hadiah utama booth (ECO LEGEND & ECO CHAMPION)
+  REVISIONS: BOOTH_CONFIG.revisions,
+  PROGRESS_RANKS: BOOTH_CONFIG.ranks,
+  REWARDS: BOOTH_CONFIG.rewards,
   RANK_BASE: { id: 'rookie', rank: 'ECO ROOKIE', minScore: 0 },
   REWARD_CODE_PREFIX: 'PLV'
 };
 
 export const OBSTACLE_DEFS = C.OBSTACLES;
 
-// Daftar rank terurut dari skor terendah. Dipakai di HUD, game over, hadiah, dan leaderboard.
+// Daftar seluruh rank terurut dari skor terendah (progress ranks + reward ranks).
 export const RANKS = [
-  { id: C.RANK_BASE.id, name: C.RANK_BASE.rank, minScore: 0, prize: null },
+  { id: C.RANK_BASE.id, name: C.RANK_BASE.rank, minScore: 0, prize: null, fullPrize: null, badge: '' },
+  ...Object.entries(C.PROGRESS_RANKS || {})
+    .map(([id, r]) => ({ id, name: r.rank, minScore: r.minScore, prize: null, fullPrize: null, badge: '' })),
   ...Object.entries(C.REWARDS)
-    .map(([id, r]) => ({ id, name: r.rank, minScore: r.minScore, prize: r.prize }))
-    .sort((a, b) => a.minScore - b.minScore)
-];
+    .map(([id, r]) => ({
+      id,
+      name: r.rank,
+      minScore: r.minScore,
+      prize: r.prize,
+      fullPrize: r.fullPrize || r.prize,
+      badge: r.badge || ''
+    }))
+].sort((a, b) => a.minScore - b.minScore);
 
 export function rankFor(score) {
   let r = RANKS[0];

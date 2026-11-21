@@ -1,12 +1,33 @@
-// leaderboard.js - Top 10 lokal (localStorage)
+// leaderboard.js - Top 10 lokal (localStorage) dengan sinkronisasi revisi Admin Manual Mode
+import { C } from './config.js';
 import { Storage, KEYS } from './storage.js';
 
 const MAX = 10;
+const MIGRATE_RANK = { explorer: 'rookie', master: 'guardian' };
+
+function syncRevision() {
+  const target = (C.REVISIONS && C.REVISIONS.leaderboard) || 1;
+  const saved = Storage.get(KEYS.REVS, null);
+  if (!saved) {
+    Storage.set(KEYS.REVS, { ...(C.REVISIONS || { stock: 1, claims: 1, leaderboard: 1 }) });
+    return;
+  }
+  if (saved.leaderboard !== undefined && saved.leaderboard !== target) {
+    Storage.set(KEYS.LB, []);
+    saved.leaderboard = target;
+    Storage.set(KEYS.REVS, saved);
+  } else if (saved.leaderboard === undefined) {
+    saved.leaderboard = target;
+    Storage.set(KEYS.REVS, saved);
+  }
+}
 
 export const Leaderboard = {
   list() {
+    syncRevision();
     const l = Storage.get(KEYS.LB, []);
-    return Array.isArray(l) ? l : [];
+    if (!Array.isArray(l)) return [];
+    return l.map((it) => (it && MIGRATE_RANK[it.rank] ? { ...it, rank: MIGRATE_RANK[it.rank] } : it));
   },
   best() { const l = this.list(); return l.length ? l[0].score : 0; },
 

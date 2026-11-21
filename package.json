@@ -5,7 +5,15 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "watch": "node build.mjs --watch"
+    "watch": "node build.mjs --watch",
+    "admin": "node scripts/admin-cli.mjs help",
+    "admin:status": "node scripts/admin-cli.mjs status",
+    "admin:reset-stock": "node scripts/admin-cli.mjs reset-stock",
+    "admin:reset-claims": "node scripts/admin-cli.mjs reset-claims",
+    "admin:reset-leaderboard": "node scripts/admin-cli.mjs reset-leaderboard",
+    "admin:set-stock": "node scripts/admin-cli.mjs set-stock",
+    "admin:set-score": "node scripts/admin-cli.mjs set-score",
+    "admin:set-reward": "node scripts/admin-cli.mjs set-reward"
   },
   "dependencies": { "three": "^0.170.0" },
   "devDependencies": { "esbuild": "^0.24.0" }

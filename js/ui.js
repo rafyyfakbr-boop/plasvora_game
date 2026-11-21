@@ -12,6 +12,32 @@ const $ = (id) => document.getElementById(id);
 const SCREENS = ['menu', 'name', 'how', 'set', 'admin', 'pause', 'over', 'claim', 'explore', 'lb', 'champ'];
 const LEGACY_RANK = { explorer: 'ECO ROOKIE', master: 'ECO GUARDIAN' };
 
+const MANUAL_COMMANDS = [
+  { cmd: 'npm run admin:status', desc: 'Lihat konfigurasi 2 hadiah booth (ECO LEGEND & ECO CHAMPION) [read-only]', warn: false },
+  { cmd: 'npm run admin:set-stock legend 5', desc: 'Atur stok ECO LEGEND (Sticker Limited)', warn: false },
+  { cmd: 'npm run admin:set-stock champion 1', desc: 'Atur stok ECO CHAMPION (HADIAH UTAMA BOOTH)', warn: false },
+  { cmd: 'npm run admin:set-score legend 5000', desc: 'Ubah skor minimum ECO LEGEND', warn: false },
+  { cmd: 'npm run admin:set-score champion 8000', desc: 'Ubah skor minimum ECO CHAMPION', warn: false },
+  { cmd: 'npm run admin:set-reward legend "Sticker Limited"', desc: 'Ubah nama hadiah ECO LEGEND / ECO CHAMPION', warn: false },
+  { cmd: 'npm run admin:reset-stock', desc: 'Reset stok hadiah booth ke angka default (destruktif)', warn: true },
+  { cmd: 'npm run admin:reset-claims', desc: 'Reset seluruh riwayat klaim booth (destruktif)', warn: true },
+  { cmd: 'npm run admin:reset-leaderboard', desc: 'Reset seluruh data leaderboard (destruktif)', warn: true }
+];
+
+const MENU_CTAS = [
+  '🏆 Jadi pemain dengan skor tertinggi dan buktikan kamu adalah <b>ECO CHAMPION!</b>',
+  '🔥 <b>CAN YOU BE #1?</b> Masuk leaderboard, kejar skor tertinggi, jadilah <b>ECO CHAMPION!</b>',
+  '🎁 Capai <b>ECO LEGEND (5.000+)</b> untuk Sticker Limited &amp; <b>ECO CHAMPION (8.000+)</b> untuk <b>HADIAH UTAMA!</b>'
+];
+
+const OVER_CTAS_PROGRESS = [
+  '🔥 <b>MAIN LAGI!</b> KEJAR <em>ECO LEGEND</em> &amp; AMBIL <b>STICKER LIMITED!</b>',
+  '🚀 <b>MASIH BISA LEBIH TINGGI!</b> Naikkan skor kamu, kejar <em>ECO LEGEND</em>, dan rebut <b>HADIAH UTAMA ECO CHAMPION!</b>',
+  '🏆 <b>CAN YOU BE #1?</b> Masuk leaderboard. Kejar skor tertinggi. Jadilah <b>ECO CHAMPION!</b>',
+  '🎁 <b>KEJAR HADIAHNYA!</b> Capai <em>ECO LEGEND (5.000)</em> &rarr; <b>STICKER LIMITED</b> &bull; <b>ECO CHAMPION (8.000)</b> &rarr; <b>HADIAH UTAMA BOOTH!</b>'
+];
+let ctaIdx = 0;
+
 let h = null;
 let cur = 'menu', exploreFrom = 'over', hlId = null, countTimer = 0, muted = false;
 
@@ -20,11 +46,16 @@ function show(name) {
   cur = name;
   for (const s of SCREENS) $('scr-' + s).hidden = (s !== name);
   if (name === 'none') return;
+  if (name === 'menu') {
+    const mc = $('menu-cta');
+    if (mc) mc.innerHTML = MENU_CTAS[ctaIdx % MENU_CTAS.length];
+    ctaIdx++;
+  }
   const scr = $('scr-' + name); if (!scr) return;
   if (name === 'name') { const n = $('nick'); n.value = ''; setTimeout(() => n.focus(), 30); }
   else if (name === 'admin') { setTimeout(() => $('adm-pin-in').focus(), 30); }
   else if (name !== 'champ') {
-    const f = [...scr.querySelectorAll('.btn')].find((b) => !b.hidden && b.classList.contains('primary')) || [...scr.querySelectorAll('.btn')].find((b) => !b.hidden);
+    const f = [...scr.querySelectorAll('.btn')].find((b) => !b.hidden && !b.disabled && b.classList.contains('primary')) || [...scr.querySelectorAll('.btn')].find((b) => !b.hidden && !b.disabled);
     if (f) setTimeout(() => f.focus(), 30);
   }
 }
@@ -199,11 +230,36 @@ function renderLB(hl) {
   hlId = hl === undefined ? hlId : hl;
   const ol = $('lb-list'), list = Leaderboard.list();
   ol.innerHTML = '';
-  if (!list.length) { const e = document.createElement('li'); e.className = 'empty'; e.textContent = 'Belum ada skor. Jadilah yang pertama!'; ol.appendChild(e); return; }
+  if (!list.length) {
+    const e = document.createElement('li');
+    e.className = 'empty';
+    e.textContent = 'Belum ada skor. Jadilah #1 TOP ECO RUNNER & rebut HADIAH UTAMA BOOTH!';
+    ol.appendChild(e);
+    return;
+  }
   list.forEach((it, i) => {
-    const li = document.createElement('li'); if (it.id === hlId) li.className = 'me';
+    const li = document.createElement('li');
+    const isTop1 = i === 0;
+    const isChamp = it.rank === 'champion';
+    const isLegend = it.rank === 'legend';
+    if (isTop1) li.classList.add('top1');
+    if (it.id === hlId) li.classList.add('me');
     const d = new Date(it.date), ds = isNaN(d) ? '' : ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2);
-    [['n', (i + 1) + '.'], ['nm', it.name], ['sc', fmt(it.score)], ['ds', km(it.distance || 0) + ' KM ' + ds], ['rk', rankName(it.rank).replace('ECO ', '')]].forEach(([c, t]) => {
+    const posTxt = isTop1 ? '🏆 #1' : '#' + (i + 1);
+    const rkLabel = isChamp && isTop1
+      ? '🏆 ECO CHAMPION • HADIAH UTAMA'
+      : isChamp
+        ? '🏆 ECO CHAMPION'
+        : isLegend
+          ? '🟢 ECO LEGEND'
+          : rankName(it.rank);
+    [
+      ['n', posTxt],
+      ['nm', it.name],
+      ['sc', fmt(it.score)],
+      ['ds', km(it.distance || 0) + ' KM ' + ds],
+      ['rk' + (isChamp ? ' chp' : isLegend ? ' leg' : ''), rkLabel]
+    ].forEach(([c, t]) => {
       const s = document.createElement('span'); s.className = c; s.textContent = t; li.appendChild(s);
     });
     ol.appendChild(li);
@@ -225,13 +281,59 @@ function countUp(el, target, ms, done) {
 function rewardLine(res) {
   const st = Reward.status(res.score, res.entry.id);
   const el = $('o-reward'); el.className = 'o-reward';
-  const claim = $('o-claim'); claim.hidden = true;
-  if (st.state === 'available') { el.innerHTML = 'REWARD UNLOCKED<br><b>' + st.prize + '</b>'; claim.hidden = false; }
-  else if (st.state === 'soldout') { el.classList.add('out'); el.innerHTML = '<b>REWARD HABIS</b><br>Tetap tercatat di leaderboard!'; }
-  else if (st.state === 'claimed') { el.innerHTML = 'Reward sudah diklaim &bull; KODE <b>' + st.code + '</b>'; }
-  else {
-    const next = RANKS.find((r) => r.prize);
-    el.innerHTML = 'Capai <b>' + fmt(next.minScore) + '</b> poin untuk reward pertama (' + next.name + ').';
+  const cta = $('o-cta');
+  const claim = $('o-claim');
+  claim.hidden = true;
+  claim.disabled = false;
+  claim.textContent = 'CLAIM REWARD';
+
+  const isChamp = st.rank.id === 'champion';
+  const isLegend = st.rank.id === 'legend';
+
+  if (st.state === 'available') {
+    if (isChamp) {
+      el.innerHTML =
+        '<div class="rw-unlock champion">' +
+        '<span class="t-badge utama">HADIAH UTAMA BOOTH</span>' +
+        '<b>🏆 ECO CHAMPION!</b>' +
+        '<span>Kamu berhasil mencapai rank tertinggi! 🎁 <b>HADIAH UTAMA BOOTH</b> menunggumu.</span>' +
+        '</div>';
+      cta.innerHTML = res.position === 1
+        ? '🏆 <b>ECO CHAMPION &bull; #1 LEADERBOARD &bull; HADIAH UTAMA BOOTH!</b>'
+        : '🏆 Klaim <b>HADIAH UTAMA BOOTH</b> sekarang &amp; kejar posisi <b>#1 LEADERBOARD!</b>';
+    } else {
+      el.innerHTML =
+        '<div class="rw-unlock legend">' +
+        '<span class="t-badge limited">LIMITED STICKER</span>' +
+        '<b>🟢 ECO LEGEND UNLOCKED!</b>' +
+        '<span>🎁 Kamu mendapatkan kesempatan untuk claim <b>STICKER LIMITED PLASVORA</b>.</span>' +
+        '</div>';
+      const toChamp = Math.max(0, C.REWARDS.champion.minScore - res.score);
+      cta.innerHTML = '🔥 Kurang <b>' + fmt(toChamp) + ' poin</b> lagi menuju <b>ECO CHAMPION (8.000+)</b> &rarr; <b>HADIAH UTAMA BOOTH!</b>';
+    }
+    claim.hidden = false;
+  } else if (st.state === 'soldout') {
+    el.classList.add('out');
+    el.innerHTML = '<b>STOK HABIS</b> (' + st.rank.name + ' &mdash; ' + st.prize + ')<br>Skor tetap tercatat di leaderboard!';
+    cta.innerHTML = '🔥 <b>CAN YOU BE #1?</b> Pertahankan namamu di puncak <b>TOP ECO RUNNERS!</b>';
+    claim.hidden = false;
+    claim.disabled = true;
+    claim.textContent = 'STOK HABIS';
+  } else if (st.state === 'claimed') {
+    el.innerHTML = '<b>REWARD CLAIMED!</b> &bull; ' + st.fullPrize + ' &bull; KODE <b>' + st.code + '</b>';
+    cta.innerHTML = '🏆 <b>MAIN LAGI!</b> Pertahankan posisi <b>#1 TOP ECO RUNNER</b> di leaderboard!';
+    claim.hidden = false;
+    claim.disabled = true;
+    claim.textContent = 'REWARD CLAIMED!';
+  } else {
+    const legScore = C.REWARDS.legend.minScore;
+    const chpScore = C.REWARDS.champion.minScore;
+    const needLeg = Math.max(0, legScore - res.score);
+    el.innerHTML =
+      'Status: <b>' + res.rank.name + '</b> &bull; Kurang <b>' + fmt(needLeg) + ' poin</b> lagi ke <b>ECO LEGEND (' + fmt(legScore) + ')</b> ' +
+      '<span class="t-badge limited">LIMITED STICKER</span> atau kejar <b>' + fmt(chpScore) + '</b> <span class="t-badge utama">HADIAH UTAMA</span>';
+    cta.innerHTML = OVER_CTAS_PROGRESS[ctaIdx % OVER_CTAS_PROGRESS.length];
+    ctaIdx++;
   }
   return st;
 }
@@ -241,15 +343,19 @@ function showOver(res, animate = true) {
   $('o-dist').textContent = km(res.meters) + ' KM';
   $('o-plastic').textContent = String(res.plastic);
   $('o-combo').textContent = 'x' + (res.maxLevel + 1);
-  $('o-rank-name').textContent = res.rank.name;
-  $('o-rank-pos').textContent = res.position === 1 ? 'RANK #1' : res.position ? 'GOOD RUN! RANK #' + res.position : 'GOOD RUN!';
+  $('o-rank-name').textContent = res.rank.id === 'champion' ? '🏆 ECO CHAMPION' : res.rank.id === 'legend' ? '🟢 ECO LEGEND' : res.rank.name;
+  $('o-rank-pos').textContent = res.position === 1
+    ? (res.rank.id === 'champion' ? '#1 LEADERBOARD • HADIAH UTAMA BOOTH' : '#1 LEADERBOARD')
+    : res.position ? 'LEADERBOARD #' + res.position : 'KEEP RUNNING!';
   const rk = $('o-rank'); rk.classList.remove('show'); void rk.offsetWidth;
   rewardLine(res);
   $('o-reward').style.visibility = 'hidden';
+  $('o-cta').style.visibility = 'hidden';
   show('over');
   countUp($('o-score'), res.score, animate ? 1000 : 0, () => {
     rk.classList.add('show');
     $('o-reward').style.visibility = 'visible';
+    $('o-cta').style.visibility = 'visible';
     if (animate && res.isTop1) setTimeout(champ, 700);
   });
 }
@@ -258,9 +364,16 @@ function champ() {
 }
 
 function showClaim(info, res) {
-  $('c-rank').textContent = info.rank.name;
+  const isChamp = info.rank.id === 'champion';
+  const card = $('c-card');
+  card.className = 'card narrow ticket tier-' + info.rank.id;
+  const badge = $('c-badge');
+  badge.className = 'c-badge ' + (isChamp ? 'utama' : 'limited');
+  badge.textContent = info.badge || (isChamp ? 'HADIAH UTAMA BOOTH' : 'LIMITED STICKER');
+  $('c-title').textContent = 'REWARD CLAIMED!';
+  $('c-rank').textContent = isChamp ? '🏆 ECO CHAMPION' : '🟢 ECO LEGEND';
   $('c-score').textContent = fmt(res.score);
-  $('c-prize').textContent = info.prize;
+  $('c-prize').textContent = info.fullPrize || info.prize;
   $('c-code').textContent = info.code;
   show('claim'); Sound.reward(); runConfetti($('confetti'));
 }
@@ -291,35 +404,114 @@ function toggleMute() {
   Sound.setVolumes(muted ? 0 : s.music, muted ? 0 : s.sfx);
 }
 
+let pendingAdminAction = null;
+
+function badgeClass(id) {
+  if (id === 'champion') return 'utama';
+  if (id === 'legend') return 'limited';
+  return 'spesial';
+}
+
+function fmtTime(iso) {
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+}
+
+function setAdminTab(tab) {
+  const isManual = tab === 'manual';
+  $('adm-view-stock').hidden = isManual;
+  $('adm-view-manual').hidden = !isManual;
+  $('adm-tab-stock').classList.toggle('active', !isManual);
+  $('adm-tab-manual').classList.toggle('active', isManual);
+  $('adm-reset').hidden = isManual;
+  $('adm-reset-claims').hidden = isManual;
+  $('adm-clear').hidden = isManual;
+  if (isManual) hideAdminConfirm();
+}
+
+function renderManualCommands() {
+  const box = $('adm-cmds');
+  if (box.childElementCount > 0) return;
+  for (const item of MANUAL_COMMANDS) {
+    const row = document.createElement('div');
+    row.className = 'cmd-row' + (item.warn ? ' warn' : '');
+    const left = document.createElement('div');
+    const code = document.createElement('code');
+    code.textContent = item.cmd;
+    const desc = document.createElement('small');
+    desc.textContent = item.desc;
+    left.appendChild(code); left.appendChild(desc);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cmd-copy';
+    btn.textContent = 'SALIN';
+    btn.onclick = () => {
+      try { navigator.clipboard.writeText(item.cmd); } catch (e) { /* fallback */ }
+      btn.textContent = 'TERSALIN';
+      setTimeout(() => { btn.textContent = 'SALIN'; }, 1400);
+    };
+    row.appendChild(left); row.appendChild(btn);
+    box.appendChild(row);
+  }
+}
+
 function renderAdmin() {
   const t = $('adm-stock');
   t.innerHTML = '<tr><th>RANK</th><th>HADIAH</th><th style="text-align:right">SISA</th></tr>' +
-    Reward.stockTable().map((r) => '<tr><td>' + r.name + '</td><td>' + r.prize + '</td><td class="n' + (r.left === 0 ? ' z' : '') + '">' + r.left + ' / ' + r.total + '</td></tr>').join('');
-  $('adm-claims').textContent = 'Total klaim tercatat: ' + Reward.claimCount();
+    Reward.stockTable().map((r) => {
+      const badge = r.badge ? '<span class="t-badge ' + badgeClass(r.id) + '">' + r.badge + '</span>' : '';
+      const stockTxt = r.soldOut ? 'STOK HABIS' : (r.left + ' / ' + r.total);
+      const ic = r.id === 'champion' ? '🏆 ' : '🟢 ';
+      return '<tr class="tier-' + r.id + '">' +
+        '<td>' + ic + r.name + '<span class="t-score">' + fmt(r.minScore) + '+ POIN</span></td>' +
+        '<td class="prize-col">' + r.prize + badge + '</td>' +
+        '<td class="n' + (r.soldOut ? ' z' : '') + '">' + stockTxt + '</td>' +
+        '</tr>';
+    }).join('');
+  $('adm-claims').textContent = 'Total claim tercatat: ' + Reward.claimCount();
+  const rec = Reward.recentClaims(3);
+  $('adm-recent').innerHTML = rec.length
+    ? rec.map((c) => '<span>' + c.name + ' &bull; ' + (c.rank || rankName(c.tier)) + ' &bull; ' + c.code + ' (' + fmtTime(c.date) + ')</span>').join('')
+    : '<span>Belum ada klaim hadiah.</span>';
+  renderManualCommands();
 }
+
+function askAdminConfirm(msg, cmd, fn) {
+  pendingAdminAction = fn;
+  $('adm-confirm-msg').textContent = msg + ' Pastikan Anda ingin melanjutkan sebelum menjalankannya.';
+  $('adm-confirm-cmd').textContent = 'Terminal manual: ' + cmd;
+  $('adm-confirm').hidden = false;
+  $('adm-confirm-no').focus();
+}
+
+function hideAdminConfirm() {
+  pendingAdminAction = null;
+  $('adm-confirm').hidden = true;
+}
+
 function adminOpen() {
-  $('adm-pin').hidden = false; $('adm-panel').hidden = true; $('adm-err').hidden = true; $('adm-pin-in').value = '';
-  $('adm-ok').hidden = false; $('adm-reset').hidden = true; $('adm-clear').hidden = true;
+  hideAdminConfirm();
+  $('adm-pin').hidden = false; $('adm-panel').hidden = true; $('adm-tabs').hidden = true;
+  $('adm-err').hidden = true; $('adm-pin-in').value = '';
+  $('adm-ok').hidden = false;
+  $('adm-reset').hidden = true; $('adm-reset-claims').hidden = true; $('adm-clear').hidden = true;
   show('admin');
 }
 function adminTry() {
   if ($('adm-pin-in').value === C.ADMIN_PIN) {
-    $('adm-pin').hidden = true; $('adm-panel').hidden = false; $('adm-ok').hidden = true;
-    $('adm-reset').hidden = false; $('adm-clear').hidden = false; renderAdmin();
+    $('adm-pin').hidden = true; $('adm-panel').hidden = false; $('adm-tabs').hidden = false;
+    $('adm-ok').hidden = true;
+    setAdminTab('stock');
+    renderAdmin();
     $('adm-back').focus();
   } else { $('adm-err').hidden = false; $('adm-pin-in').select(); }
-}
-function armed(btn, label, run) {
-  btn.onclick = () => {
-    if (btn.dataset.armed === '1') { btn.dataset.armed = '0'; btn.textContent = label; run(); }
-    else { btn.dataset.armed = '1'; btn.textContent = 'YAKIN? KLIK LAGI'; setTimeout(() => { btn.dataset.armed = '0'; btn.textContent = label; }, 3500); }
-  };
 }
 
 /* ---------------- navigasi keyboard ---------------- */
 function visibleButtons() {
   const scr = $('scr-' + cur); if (!scr) return [];
-  return [...scr.querySelectorAll('.btn, .link')].filter((b) => !b.hidden && b.offsetParent !== null);
+  return [...scr.querySelectorAll('.btn, .link')].filter((b) => !b.hidden && !b.disabled && b.offsetParent !== null);
 }
 function back() {
   if (cur === 'name') show('menu');
@@ -379,9 +571,14 @@ function init(handlers) {
   c('b-full', toggleFull);
   c('b-admin', adminOpen);
   c('adm-ok', adminTry);
-  c('adm-back', () => show('set'));
-  armed($('adm-reset'), 'RESET STOK', () => { Reward.resetStock(); renderAdmin(); });
-  armed($('adm-clear'), 'HAPUS LEADERBOARD', () => { Leaderboard.clear(); });
+  c('adm-back', () => { hideAdminConfirm(); show('set'); });
+  c('adm-tab-stock', () => setAdminTab('stock'));
+  c('adm-tab-manual', () => setAdminTab('manual'));
+  c('adm-reset', () => askAdminConfirm('Aksi ini akan mereset seluruh sisa stok hadiah booth ke angka default.', 'npm run admin:reset-stock', () => { Reward.resetStock(); renderAdmin(); }));
+  c('adm-reset-claims', () => askAdminConfirm('Aksi ini akan menghapus seluruh catatan riwayat klaim booth.', 'npm run admin:reset-claims', () => { Reward.resetClaims(); renderAdmin(); }));
+  c('adm-clear', () => askAdminConfirm('Aksi ini akan menghapus seluruh skor di leaderboard booth.', 'npm run admin:reset-leaderboard', () => { Leaderboard.clear(); renderAdmin(); }));
+  c('adm-confirm-yes', () => { const fn = pendingAdminAction; hideAdminConfirm(); if (fn) fn(); });
+  c('adm-confirm-no', hideAdminConfirm);
   $('vol-music').oninput = onVol; $('vol-sfx').oninput = onVol;
 
   c('p-resume', () => h.resume());

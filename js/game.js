@@ -146,21 +146,28 @@ export function createGame() {
       Sound.combo(Math.min(7, phase.id));
     }
 
-    // Pengumuman pencapaian tier baru
+    // Pengumuman pencapaian tier baru (progress ranks vs 2 reward ranks)
     const r = rankFor(score.score);
     if (r.id !== g.rankId) {
       g.rankId = r.id;
       if (r.id !== C.RANK_BASE.id) {
         const isChamp = r.id === 'champion';
+        const isLegend = r.id === 'legend';
+        const sub = isChamp
+          ? '🏆 HADIAH UTAMA BOOTH TERBUKA!'
+          : isLegend
+            ? '🎁 STICKER LIMITED PLASVORA TERBUKA!'
+            : 'PROGRESS RANK • KEJAR ECO LEGEND (5.000)';
         UI.feedback.push({
-          text: isChamp ? '★ ECO CHAMPION! ★' : r.name + ' UNLOCKED!',
-          sub: isChamp ? 'HADIAH UTAMA BOOTH TERBUKA!' : (r.prize || ''),
-          cls: isChamp || r.id === 'legend' ? 'gold' : 'green',
-          dur: isChamp ? 2.4 : 1.6,
-          prio: isChamp ? 8 : 5
+          text: isChamp ? '🏆 ECO CHAMPION! ★' : isLegend ? 'ECO LEGEND UNLOCKED!' : r.name + '!',
+          sub,
+          cls: isChamp ? 'gold' : isLegend ? 'green' : 'cyan',
+          dur: isChamp ? 2.5 : isLegend ? 2.1 : 1.5,
+          prio: isChamp ? 8 : isLegend ? 7 : 5
         });
         if (isChamp) { Sound.highScore(); fx.burst(player.x, 2, 0.5, 0xffd23f, 45, 9); fx.ring(player.x, 1.4, 0xffd23f, 4.5); }
-        else { Sound.reward(); fx.ring(player.x, 1.4, 0x39ffa0, 3.2); }
+        else if (isLegend) { Sound.reward(); fx.burst(player.x, 1.8, 0.5, 0x39ffa0, 32, 7); fx.ring(player.x, 1.4, 0x39ffa0, 3.6); }
+        else { Sound.combo(4); fx.ring(player.x, 1.4, 0x19d4ff, 2.8); }
       }
     }
   }
@@ -191,7 +198,7 @@ export function createGame() {
     const c = Reward.claim(r.entry.id, r.score, r.name);
     if (c.ok || c.reason === 'claimed') {
       setState(STATE.REWARD);
-      UI.showClaim({ rank: c.rank, prize: c.prize, code: c.code }, r);
+      UI.showClaim({ rank: c.rank, prize: c.prize, fullPrize: c.fullPrize, badge: c.badge, code: c.code }, r);
     } else UI.showOver(r, false);
   }
 
