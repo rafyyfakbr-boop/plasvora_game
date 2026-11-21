@@ -19,19 +19,25 @@
       <div class="hud-l">
         <div class="brand"><span class="mark">&#9851;</span><div><b>PLASVORA</b><small>ECO RUNNER</small></div></div>
         <div class="hearts" id="h-hearts"></div>
+        <div class="phase-pill p1" id="h-phase">P1 &bull; ECO START</div>
         <div class="combo" id="h-combo" hidden>COMBO <b id="h-combo-n">x2</b></div>
       </div>
       <div class="hud-c">
         <small>SCORE</small>
-        <b id="h-score">000000</b>
+        <b id="h-score">0</b>
+        <div class="tier-box" id="h-tier-box">
+          <div class="tier-head"><span id="h-tier-name">ECO ROOKIE</span><span id="h-tier-next">NEXT: ECO HERO &mdash; 1.000</span></div>
+          <div class="tier-bar"><i id="h-tier-fill"></i></div>
+        </div>
       </div>
       <div class="hud-r">
-        <div class="r-row hi"><small>HIGH SCORE</small><b id="h-high">000000</b></div>
+        <div class="r-row hi"><small>HIGH SCORE</small><b id="h-high">0</b></div>
         <div class="r-row"><small>DISTANCE</small><b><span id="h-dist">0.00</span> KM</b></div>
         <div class="r-row"><small>PLASTIC</small><b id="h-plastic">0</b></div>
-        <div class="r-row"><small>SPEED</small><b><span id="h-speed">1.0</span>x</b></div>
+        <div class="r-row"><small>SPEED</small><b><span id="h-speed">1.00</span>x</b></div>
       </div>
-      <div class="boss-bar" id="h-boss" hidden><small>ECO BOSS &bull; BERTAHAN <b id="h-boss-t">12</b> DETIK</small><i><u id="h-boss-fill"></u></i></div>
+      <div class="boss-bar" id="h-boss" hidden><small><span id="h-boss-name">ECO BOSS</span> &bull; BERTAHAN <b id="h-boss-t">12</b> DETIK</small><i><u id="h-boss-fill"></u></i></div>
+      <div class="warn-edge" id="h-warn" hidden><b id="h-warn-ic">&#9650;</b><small id="h-warn-txt">JUMP</small></div>
       <div class="powers" id="h-powers"></div>
       <div class="ctrl-hint" id="h-hint"><kbd>SPACE</kbd> / <kbd>&uarr;</kbd> LOMPAT <span>&nbsp;&nbsp;</span> <kbd>&darr;</kbd> SLIDE</div>
     </div>
@@ -77,7 +83,7 @@
           <div class="key"><div class="caps"><kbd>&darr;</kbd></div><b>SLIDE</b></div>
           <div class="key"><div class="caps"><kbd>P</kbd><kbd>ESC</kbd></div><b>PAUSE</b></div>
         </div>
-        <ul class="tips"><li>Kumpulkan plastik.</li><li>Hindari obstacle.</li><li>Bangun combo.</li><li>Kejar skor tertinggi.</li></ul>
+        <ul class="tips"><li>Kumpulkan Plastic, Recycled, Rare &amp; Golden Material.</li><li>Hindari obstacle &amp; kombinasi dengan lompat atau slide.</li><li>Jaga combo hingga x8 (Shield menyelamatkan combo!).</li><li>Bertahan dari Eco Boss &amp; kejar 8.000+ untuk ECO CHAMPION.</li></ul>
         <div class="btns row"><button class="btn primary" id="how-back" type="button">MENGERTI</button></div>
       </div>
     </section>

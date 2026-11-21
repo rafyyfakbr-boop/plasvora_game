@@ -1,17 +1,18 @@
-// ui.js - semua tampilan DOM: HUD, antrean umpan balik, menu, game over, hadiah, leaderboard, admin
+// ui.js - semua tampilan DOM: HUD + Tier Progress, antrean umpan balik, menu, game over, hadiah, leaderboard, admin
 import { C, RANKS } from './config.js';
 import { STATE } from './states.js';
 import { Sound } from './audio.js';
 import { Settings } from './storage.js';
 import { Leaderboard } from './leaderboard.js';
 import { Reward } from './reward.js';
-import { pad6, fmt, km } from './util.js';
+import { fmt, km } from './util.js';
 import { runConfetti } from './effects.js';
 
 const $ = (id) => document.getElementById(id);
 const SCREENS = ['menu', 'name', 'how', 'set', 'admin', 'pause', 'over', 'claim', 'explore', 'lb', 'champ'];
+const LEGACY_RANK = { explorer: 'ECO ROOKIE', master: 'ECO GUARDIAN' };
 
-let h = null;                 // handlers dari game
+let h = null;
 let cur = 'menu', exploreFrom = 'over', hlId = null, countTimer = 0, muted = false;
 
 /* ---------------- layar ---------------- */
@@ -32,12 +33,18 @@ function show(name) {
 const cache = {};
 function setText(id, v) { if (cache[id] !== v) { cache[id] = v; $(id).textContent = v; } }
 
-const PW = [['boost', '2X', 'ECO BOOST'], ['magnet', 'M', 'MAGNET'], ['shield', 'S', 'SHIELD'], ['speed', '»', 'SPEED']];
+const PW = [
+  ['boost', '⚡', 'ECO BOOST'],
+  ['magnet', 'M', 'MAGNET'],
+  ['shield', 'S', 'SHIELD'],
+  ['speed', '»', 'SPEED'],
+  ['guard', 'G', 'COMBO GUARD']
+];
 const pwEls = {};
 function buildPowers() {
   const box = $('h-powers');
   for (const [k, ic] of PW) {
-    const d = document.createElement('div'); d.className = 'pw'; d.hidden = true;
+    const d = document.createElement('div'); d.className = 'pw' + (k === 'guard' ? ' guard' : ''); d.hidden = true;
     d.innerHTML = '<span class="ic">' + ic + '</span><i><u></u></i>';
     box.appendChild(d); pwEls[k] = { el: d, bar: d.querySelector('u') };
   }
@@ -46,42 +53,83 @@ function buildPowers() {
 }
 
 function setHud(d) {
-  setText('h-score', pad6(d.score));
-  setText('h-high', pad6(Math.max(d.high, d.score)));
+  setText('h-score', fmt(d.score));
+  setText('h-high', fmt(Math.max(d.high, d.score)));
   setText('h-dist', km(d.meters));
   setText('h-plastic', String(d.plastic));
-  setText('h-speed', d.speed.toFixed(1));
+  setText('h-speed', d.speed.toFixed(2));
+
+  if (d.phase) {
+    const pTxt = 'P' + d.phase.id + ' • ' + d.phase.name;
+    setText('h-phase', pTxt);
+    const phEl = $('h-phase');
+    const pCls = 'phase-pill p' + d.phase.id;
+    if (cache.phCls !== pCls) { cache.phCls = pCls; phEl.className = pCls; }
+  }
+
+  // Score Tier Progress Display (minimalis & informatif)
+  if (d.tier) {
+    const { cur: tc, next: tn, pct } = d.tier;
+    setText('h-tier-name', tc.name);
+    const nextTxt = tn ? ('NEXT: ' + tn.name + ' — ' + fmt(tn.minScore)) : '★ HADIAH UTAMA TERBUKA ★';
+    setText('h-tier-next', nextTxt);
+    const pctRound = Math.round(pct * 100);
+    if (cache.tierPct !== pctRound) { cache.tierPct = pctRound; $('h-tier-fill').style.width = pctRound + '%'; }
+    const tb = $('h-tier-box');
+    const isChamp = !tn;
+    if (cache.isChamp !== isChamp) { cache.isChamp = isChamp; tb.classList.toggle('champ', isChamp); }
+  }
+
   const hearts = $('h-hearts').children;
   for (let i = 0; i < hearts.length; i++) hearts[i].className = i < d.lives ? '' : 'off';
-  // combo: tampil mulai x2
+
+  // Combo: tampil mulai x2..x8
   const cb = $('h-combo');
   if (d.level >= 1) {
     if (cb.hidden) cb.hidden = false;
     const t = 'x' + (d.level + 1);
     if (cache.combo !== t) { cache.combo = t; $('h-combo-n').textContent = t; cb.classList.remove('pulse'); void cb.offsetWidth; cb.classList.add('pulse'); }
   } else if (!cb.hidden) { cb.hidden = true; cache.combo = ''; }
-  // boss
+
+  // Boss bar dengan nama varian & tingkat kesulitan
   const bb = $('h-boss');
-  if (d.boss.active) {
+  if (d.boss && d.boss.active) {
     if (bb.hidden) bb.hidden = false;
+    const vName = d.boss.variant ? d.boss.variant.name : 'ECO BOSS';
+    const dLbl = d.boss.diff ? ' [' + d.boss.diff.label + ']' : '';
+    setText('h-boss-name', vName + dLbl);
     setText('h-boss-t', String(Math.ceil(d.boss.left)));
-    $('h-boss-fill').style.width = (100 * (1 - d.boss.left / d.boss.total)) + '%';
+    $('h-boss-fill').style.width = (100 * (1 - d.boss.left / Math.max(1, d.boss.total))) + '%';
   } else if (!bb.hidden) bb.hidden = true;
-  // power-up
+
+  // Peringatan visual singkat di tepi kanan untuk obstacle berat (dumpster, lowBeam, car)
+  const wn = $('h-warn');
+  if (d.warn) {
+    if (wn.hidden) wn.hidden = false;
+    const isSlide = d.warn.need === 'slide';
+    setText('h-warn-ic', isSlide ? '▼' : '▲');
+    setText('h-warn-txt', isSlide ? 'SLIDE' : 'JUMP');
+    if (cache.warnSlide !== isSlide) { cache.warnSlide = isSlide; wn.classList.toggle('slide', isSlide); }
+  } else if (!wn.hidden) {
+    wn.hidden = true;
+  }
+
+  // Power-up & Combo Protection
   for (const [k] of PW) {
     const p = pwEls[k], v = d.powers[k];
     const on = k === 'shield' ? !!v : v > 0;
     if (p.el.hidden === on) p.el.hidden = !on;
-    if (on) p.bar.style.width = (k === 'shield' ? 100 : 100 * v / C.POWER[k]) + '%';
+    if (on) {
+      const denom = k === 'guard' ? 8 : (C.POWER[k] || 1);
+      p.bar.style.width = (k === 'shield' ? 100 : Math.min(100, 100 * v / denom)) + '%';
+    }
   }
   const hint = $('h-hint');
   if (hint.classList.contains('off') !== !d.hint) hint.classList.toggle('off', !d.hint);
 }
 function bumpScore() { const b = $('h-score'); b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); }
 
-/* ---------------- antrean umpan balik ----------------
-   Hanya satu banner besar pada satu waktu. Banner prioritas lebih tinggi menggantikan yang lebih rendah,
-   yang menunggu terlalu lama dibuang. Teks kecil di dekat robot dibatasi tiga sekaligus. */
+/* ---------------- antrean umpan balik ---------------- */
 const fb = {
   active: null, t: 0, queue: [],
   push(it) {
@@ -134,11 +182,19 @@ function countdown(label) {
 }
 const hideCountdown = () => { $('countdown').hidden = true; };
 function runTag(text) { const e = $('runtag'); if (!text) { e.hidden = true; return; } e.textContent = text; e.hidden = false; }
-function hudShow(v) { $('hud').hidden = !v; if (!v) { fb.clear(); $('countdown').hidden = true; $('runtag').hidden = true; } }
-function resetHudCache() { for (const k in cache) delete cache[k]; $('h-combo').hidden = true; $('h-boss').hidden = true; $('h-hint').classList.remove('off'); }
+function hudShow(v) { $('hud').hidden = !v; if (!v) { fb.clear(); $('countdown').hidden = true; $('runtag').hidden = true; $('h-warn').hidden = true; } }
+function resetHudCache() {
+  for (const k in cache) delete cache[k];
+  $('h-combo').hidden = true; $('h-boss').hidden = true; $('h-warn').hidden = true;
+  $('h-hint').classList.remove('off');
+  $('h-tier-box').classList.remove('champ');
+}
 
 /* ---------------- leaderboard ---------------- */
-function rankName(id) { const r = RANKS.find((x) => x.id === id); return r ? r.name : ''; }
+function rankName(id) {
+  const r = RANKS.find((x) => x.id === id);
+  return r ? r.name : (LEGACY_RANK[id] || '');
+}
 function renderLB(hl) {
   hlId = hl === undefined ? hlId : hl;
   const ol = $('lb-list'), list = Leaderboard.list();
@@ -175,7 +231,7 @@ function rewardLine(res) {
   else if (st.state === 'claimed') { el.innerHTML = 'Reward sudah diklaim &bull; KODE <b>' + st.code + '</b>'; }
   else {
     const next = RANKS.find((r) => r.prize);
-    el.innerHTML = 'Capai <b>' + fmt(next.minScore) + '</b> poin untuk reward pertama.';
+    el.innerHTML = 'Capai <b>' + fmt(next.minScore) + '</b> poin untuk reward pertama (' + next.name + ').';
   }
   return st;
 }

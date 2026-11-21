@@ -1,13 +1,15 @@
-// world.js - kota malam berlapis (parallax): langit, bulan, gedung jauh, gedung tengah, properti pinggir jalan, jalan.
+// world.js - kota malam berlapis (parallax) dengan transisi atmosfer bertahap per Phase 1..5 & varian Eco Boss.
 // Lapisan bergeser dengan faktor berbeda sehingga kecepatan terasa naik saat game makin cepat.
 import * as THREE from 'three';
-import { RNG, canvasTexture, roundRect, lerp } from './util.js';
+import { C } from './config.js';
+import { RNG, canvasTexture, roundRect } from './util.js';
 import { COLORS } from './models.js';
 
-const BG = new THREE.Color(0x041512);
-const BG_BOSS = new THREE.Color(0x24070f);
-const HEMI = new THREE.Color(0x9fe8ff);
-const HEMI_BOSS = new THREE.Color(0xff8a9a);
+const BASE_BG = new THREE.Color(0x041512);
+const BASE_HEMI = new THREE.Color(0x9fe8ff);
+const BASE_EDGE = new THREE.Color(COLORS.neon);
+const MOON_NORM = new THREE.Color(0xd9fff0);
+const MOON_BOSS = new THREE.Color(0xffb0b8);
 
 function windowTexture(seed, lit) {
   const rng = new RNG(seed);
@@ -71,12 +73,15 @@ export class World {
   constructor(scene) {
     this.scene = scene;
     this.dist = 0; this.bossF = 0; this.t = 0;
+    this._tgtBg = BASE_BG.clone();
+    this._tgtHemi = BASE_HEMI.clone();
+    this._tgtEdge = BASE_EDGE.clone();
     const seed = Math.floor(Math.random() * 1e9);
 
-    scene.background = BG.clone();
+    scene.background = BASE_BG.clone();
     scene.fog = new THREE.Fog(0x061714, 55, 170);
 
-    this.hemi = new THREE.HemisphereLight(HEMI.getHex(), 0x0b2a24, 1.55);
+    this.hemi = new THREE.HemisphereLight(BASE_HEMI.getHex(), 0x0b2a24, 1.55);
     scene.add(this.hemi);
     const sun = new THREE.DirectionalLight(0xcfeaff, 1.7); sun.position.set(-6, 14, 12); scene.add(sun);
 
@@ -118,7 +123,7 @@ export class World {
         const w = rng.range(5, 9), h = rng.range(12, 32), b = building(rng, w, h, 6, farMat, rng.chance(0.4) ? COLORS.neon : 0);
         b.position.x = x + w / 2; g.add(b); x += w + rng.range(0.5, 2);
       }
-      if (i === 1) { // satu billboard teks PLASVORA, ditaruh rendah supaya tidak bertabrakan dengan HUD
+      if (i === 1) {
         const s = new THREE.Mesh(new THREE.PlaneGeometry(14, 7), new THREE.MeshBasicMaterial({ map: iconSign('text', '#39ffa0'), transparent: true, opacity: 0.9 }));
         s.position.set(20, 8, 3.2); g.add(s);
       }
@@ -126,13 +131,13 @@ export class World {
     }, -52);
 
     // gedung tengah
-    this.mid = new THREE.Group(); // (hanya penampung agar mudah diatur)
+    this.mid = new THREE.Group();
     this.midLayer = new Layer(scene, 30, 0.34, (i) => {
       const rng = new RNG(seed + 200 + i), g = new THREE.Group(); let x = 0;
       while (x < 30) {
         const w = rng.range(4, 7), h = rng.range(7, 17), b = building(rng, w, h, 5, midMat, rng.chance(0.5) ? COLORS.cyan : COLORS.neon);
         b.position.x = x + w / 2; g.add(b); x += w + rng.range(0.4, 1.5);
-        if (rng.chance(0.3)) { // papan ikon daur ulang di wajah gedung
+        if (rng.chance(0.3)) {
           const s = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.2), new THREE.MeshBasicMaterial({ map: iconSign('icon', rng.chance(0.5) ? '#39ffa0' : '#19d4ff'), transparent: true, opacity: 0.85 }));
           s.position.set(b.position.x, rng.range(3.5, 5), 2.6); g.add(s);
         }
@@ -176,7 +181,7 @@ export class World {
       c.fillStyle = '#0d1f1d'; c.fillRect(0, 0, w, h);
       const rng = new RNG(5);
       for (let i = 0; i < 700; i++) { c.fillStyle = 'rgba(255,255,255,' + (0.02 + rng.next() * 0.05) + ')'; c.fillRect(rng.next() * w, rng.next() * h, 2, 2); }
-      c.fillStyle = 'rgba(220,255,240,.5)'; c.fillRect(0, 118, 230, 8);   // garis putus tengah
+      c.fillStyle = 'rgba(220,255,240,.5)'; c.fillRect(0, 118, 230, 8);
     }, { repeat: true });
     roadTex.repeat.set(260 / 8, 1);
     this.roadTex = roadTex;
@@ -191,18 +196,25 @@ export class World {
     behind.rotation.x = -Math.PI / 2; behind.position.set(5, -0.03, -40); scene.add(behind);
   }
 
-  // dx = jarak dunia bergeser frame ini; bossTarget 0..1 untuk nuansa Eco Boss
-  update(dt, dx, bossTarget) {
+  // dx = jarak dunia bergeser frame ini; phaseObj = C.PHASES[i]; bossVariant = objek varian boss atau null
+  update(dt, dx, bossVariant, phaseObj) {
     this.t += dt; this.dist += dx;
     this.far.update(dx); this.midLayer.update(dx); this.near.update(dx);
     this.roadTex.offset.x = (this.dist / 8) % 1;
-    this.bossF += (bossTarget - this.bossF) * Math.min(1, dt * 2.5);
-    const f = this.bossF;
-    this.scene.background.copy(BG).lerp(BG_BOSS, f);
+
+    const theme = bossVariant || phaseObj || C.PHASES[0];
+    this._tgtBg.setHex(theme.bg);
+    this._tgtHemi.setHex(theme.hemi);
+    this._tgtEdge.setHex(theme.edge);
+
+    const k = Math.min(1, dt * 2.2);
+    this.scene.background.lerp(this._tgtBg, k);
     this.scene.fog.color.copy(this.scene.background);
-    this.hemi.color.copy(HEMI).lerp(HEMI_BOSS, f * 0.6);
-    this.edge.material.color.setHex(f > 0.5 ? COLORS.danger : COLORS.neon);
-    this.moonDisc.material.color.setHex(f > 0.5 ? 0xffb0b8 : 0xd9fff0);
+    this.hemi.color.lerp(this._tgtHemi, k);
+    this.edge.material.color.lerp(this._tgtEdge, k);
+
+    this.bossF += ((bossVariant ? 1 : 0) - this.bossF) * Math.min(1, dt * 2.5);
+    this.moonDisc.material.color.copy(MOON_NORM).lerp(MOON_BOSS, this.bossF);
     this.moon.position.y = 11 + Math.sin(this.t * 0.3) * 0.3;
   }
 }
