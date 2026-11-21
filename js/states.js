@@ -1,0 +1,13 @@
+// states.js - status game
+export const STATE = {
+  MENU: 'MENU',
+  HOW_TO_PLAY: 'HOW_TO_PLAY',
+  COUNTDOWN: 'COUNTDOWN',
+  PLAYING: 'PLAYING',
+  PAUSED: 'PAUSED',
+  BOSS: 'BOSS',
+  GAME_OVER: 'GAME_OVER',
+  REWARD: 'REWARD',
+  LEADERBOARD: 'LEADERBOARD',
+  SETTINGS: 'SETTINGS'
+};
