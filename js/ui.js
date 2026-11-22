@@ -14,27 +14,27 @@ const LEGACY_RANK = { explorer: 'ECO ROOKIE', master: 'ECO GUARDIAN' };
 
 const MANUAL_COMMANDS = [
   { cmd: 'npm run admin:status', desc: 'Lihat konfigurasi 2 hadiah booth (ECO LEGEND & ECO CHAMPION) [read-only]', warn: false },
-  { cmd: 'npm run admin:set-stock legend 5', desc: 'Atur stok ECO LEGEND (Sticker Limited)', warn: false },
-  { cmd: 'npm run admin:set-stock champion 1', desc: 'Atur stok ECO CHAMPION (HADIAH UTAMA BOOTH)', warn: false },
-  { cmd: 'npm run admin:set-score legend 5000', desc: 'Ubah skor minimum ECO LEGEND', warn: false },
-  { cmd: 'npm run admin:set-score champion 8000', desc: 'Ubah skor minimum ECO CHAMPION', warn: false },
-  { cmd: 'npm run admin:set-reward legend "Sticker Limited"', desc: 'Ubah nama hadiah ECO LEGEND / ECO CHAMPION', warn: false },
+  { cmd: 'npm run admin:set-stock legend 5', desc: 'Atur stok ECO LEGEND (STICKER LIMITED)', warn: false },
+  { cmd: 'npm run admin:set-stock champion 1', desc: 'Atur stok ECO CHAMPION (STIKER JUARA)', warn: false },
+  { cmd: 'npm run admin:set-score legend 7000', desc: 'Ubah skor minimum ECO LEGEND', warn: false },
+  { cmd: 'npm run admin:set-score champion 11000', desc: 'Ubah skor minimum ECO CHAMPION', warn: false },
+  { cmd: 'npm run admin:set-reward legend "STICKER LIMITED"', desc: 'Ubah nama hadiah ECO LEGEND / ECO CHAMPION', warn: false },
   { cmd: 'npm run admin:reset-stock', desc: 'Reset stok hadiah booth ke angka default (destruktif)', warn: true },
   { cmd: 'npm run admin:reset-claims', desc: 'Reset seluruh riwayat klaim booth (destruktif)', warn: true },
   { cmd: 'npm run admin:reset-leaderboard', desc: 'Reset seluruh data leaderboard (destruktif)', warn: true }
 ];
 
 const MENU_CTAS = [
-  '🏆 Jadi pemain dengan skor tertinggi dan buktikan kamu adalah <b>ECO CHAMPION!</b>',
-  '🔥 <b>CAN YOU BE #1?</b> Masuk leaderboard, kejar skor tertinggi, jadilah <b>ECO CHAMPION!</b>',
-  '🎁 Capai <b>ECO LEGEND (5.000+)</b> untuk Sticker Limited &amp; <b>ECO CHAMPION (8.000+)</b> untuk <b>HADIAH UTAMA!</b>'
+  '🏆 Jadi <b>#1 LEADERBOARD</b> &amp; buktikan kamu adalah <b>ECO CHAMPION!</b>',
+  '🔥 <b>CAN YOU BE #1?</b> Kejar skor tertinggi &amp; raih <b>STIKER JUARA!</b>',
+  '🎁 Capai <b>7.000+</b> untuk <b>STICKER LIMITED</b> &amp; <b>11.000+</b> untuk <b>STIKER JUARA!</b>'
 ];
 
-const OVER_CTAS_PROGRESS = [
-  '🔥 <b>MAIN LAGI!</b> KEJAR <em>ECO LEGEND</em> &amp; AMBIL <b>STICKER LIMITED!</b>',
-  '🚀 <b>MASIH BISA LEBIH TINGGI!</b> Naikkan skor kamu, kejar <em>ECO LEGEND</em>, dan rebut <b>HADIAH UTAMA ECO CHAMPION!</b>',
-  '🏆 <b>CAN YOU BE #1?</b> Masuk leaderboard. Kejar skor tertinggi. Jadilah <b>ECO CHAMPION!</b>',
-  '🎁 <b>KEJAR HADIAHNYA!</b> Capai <em>ECO LEGEND (5.000)</em> &rarr; <b>STICKER LIMITED</b> &bull; <b>ECO CHAMPION (8.000)</b> &rarr; <b>HADIAH UTAMA BOOTH!</b>'
+const OVER_CTAS_BELOW_LEGEND = [
+  'KEJAR ECO LEGEND &rarr; <em>STICKER LIMITED</em>',
+  '🔥 KEJAR ECO LEGEND &mdash; <em>STICKER LIMITED</em> MENUNGGU!',
+  'NAIKKAN SKORMU DAN JADI <b>#1!</b>',
+  '🔥 <b>CAN YOU BE #1?</b> KEJAR ECO LEGEND!'
 ];
 let ctaIdx = 0;
 
@@ -102,7 +102,7 @@ function setHud(d) {
   if (d.tier) {
     const { cur: tc, next: tn, pct } = d.tier;
     setText('h-tier-name', tc.name);
-    const nextTxt = tn ? ('NEXT: ' + tn.name + ' — ' + fmt(tn.minScore)) : '★ HADIAH UTAMA TERBUKA ★';
+    const nextTxt = tn ? ('NEXT: ' + tn.name + ' — ' + fmt(tn.minScore)) : '★ STIKER JUARA TERBUKA ★';
     setText('h-tier-next', nextTxt);
     const pctRound = Math.round(pct * 100);
     if (cache.tierPct !== pctRound) { cache.tierPct = pctRound; $('h-tier-fill').style.width = pctRound + '%'; }
@@ -233,7 +233,7 @@ function renderLB(hl) {
   if (!list.length) {
     const e = document.createElement('li');
     e.className = 'empty';
-    e.textContent = 'Belum ada skor. Jadilah #1 TOP ECO RUNNER & rebut HADIAH UTAMA BOOTH!';
+    e.textContent = 'Belum ada skor. Jadilah #1 TOP ECO RUNNER & raih STIKER JUARA!';
     ol.appendChild(e);
     return;
   }
@@ -247,7 +247,7 @@ function renderLB(hl) {
     const d = new Date(it.date), ds = isNaN(d) ? '' : ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2);
     const posTxt = isTop1 ? '🏆 #1' : '#' + (i + 1);
     const rkLabel = isChamp && isTop1
-      ? '🏆 ECO CHAMPION • HADIAH UTAMA'
+      ? '🏆 ECO CHAMPION • STIKER JUARA'
       : isChamp
         ? '🏆 ECO CHAMPION'
         : isLegend
@@ -288,51 +288,49 @@ function rewardLine(res) {
   claim.textContent = 'CLAIM REWARD';
 
   const isChamp = st.rank.id === 'champion';
-  const isLegend = st.rank.id === 'legend';
+  const legScore = C.REWARDS.legend.minScore;
+  const chpScore = C.REWARDS.champion.minScore;
 
   if (st.state === 'available') {
     if (isChamp) {
       el.innerHTML =
         '<div class="rw-unlock champion">' +
-        '<span class="t-badge utama">HADIAH UTAMA BOOTH</span>' +
         '<b>🏆 ECO CHAMPION!</b>' +
-        '<span>Kamu berhasil mencapai rank tertinggi! 🎁 <b>HADIAH UTAMA BOOTH</b> menunggumu.</span>' +
+        '<span>STIKER JUARA UNLOCKED</span>' +
         '</div>';
-      cta.innerHTML = res.position === 1
-        ? '🏆 <b>ECO CHAMPION &bull; #1 LEADERBOARD &bull; HADIAH UTAMA BOOTH!</b>'
-        : '🏆 Klaim <b>HADIAH UTAMA BOOTH</b> sekarang &amp; kejar posisi <b>#1 LEADERBOARD!</b>';
+      cta.innerHTML = '👑 <b>ECO CHAMPION!</b> KAMU BERHASIL MERAIH <b>STIKER JUARA!</b>';
     } else {
+      const toChamp = Math.max(0, chpScore - res.score);
       el.innerHTML =
         '<div class="rw-unlock legend">' +
-        '<span class="t-badge limited">LIMITED STICKER</span>' +
-        '<b>🟢 ECO LEGEND UNLOCKED!</b>' +
-        '<span>🎁 Kamu mendapatkan kesempatan untuk claim <b>STICKER LIMITED PLASVORA</b>.</span>' +
+        '<b>🎁 ECO LEGEND!</b>' +
+        '<span>STICKER LIMITED UNLOCKED</span>' +
         '</div>';
-      const toChamp = Math.max(0, C.REWARDS.champion.minScore - res.score);
-      cta.innerHTML = '🔥 Kurang <b>' + fmt(toChamp) + ' poin</b> lagi menuju <b>ECO CHAMPION (8.000+)</b> &rarr; <b>HADIAH UTAMA BOOTH!</b>';
+      cta.innerHTML = toChamp > 0
+        ? '🏆 ' + fmt(toChamp) + ' POIN MENUJU ECO CHAMPION &rarr; <b>STIKER JUARA</b>'
+        : '🏆 TINGGAL SEDIKIT LAGI &mdash; KEJAR <b>ECO CHAMPION!</b>';
     }
     claim.hidden = false;
   } else if (st.state === 'soldout') {
     el.classList.add('out');
-    el.innerHTML = '<b>STOK HABIS</b> (' + st.rank.name + ' &mdash; ' + st.prize + ')<br>Skor tetap tercatat di leaderboard!';
-    cta.innerHTML = '🔥 <b>CAN YOU BE #1?</b> Pertahankan namamu di puncak <b>TOP ECO RUNNERS!</b>';
+    el.innerHTML = '<b>STOK HABIS</b> &bull; ' + st.prize;
+    cta.innerHTML = res.position === 1 ? '👑 PERTAHANKAN POSISI <b>#1 LEADERBOARD!</b>' : '🔥 <b>CAN YOU BE #1?</b> NAIKKAN SKORMU!';
     claim.hidden = false;
     claim.disabled = true;
     claim.textContent = 'STOK HABIS';
   } else if (st.state === 'claimed') {
-    el.innerHTML = '<b>REWARD CLAIMED!</b> &bull; ' + st.fullPrize + ' &bull; KODE <b>' + st.code + '</b>';
-    cta.innerHTML = '🏆 <b>MAIN LAGI!</b> Pertahankan posisi <b>#1 TOP ECO RUNNER</b> di leaderboard!';
+    el.innerHTML = '<b>REWARD CLAIMED!</b> &bull; KODE <b>' + st.code + '</b>';
+    cta.innerHTML = isChamp
+      ? '👑 <b>ECO CHAMPION!</b> KAMU BERHASIL MERAIH <b>STIKER JUARA!</b>'
+      : '🏆 TINGGAL SEDIKIT LAGI &mdash; KEJAR <b>ECO CHAMPION &rarr; STIKER JUARA</b>';
     claim.hidden = false;
     claim.disabled = true;
     claim.textContent = 'REWARD CLAIMED!';
   } else {
-    const legScore = C.REWARDS.legend.minScore;
-    const chpScore = C.REWARDS.champion.minScore;
     const needLeg = Math.max(0, legScore - res.score);
-    el.innerHTML =
-      'Status: <b>' + res.rank.name + '</b> &bull; Kurang <b>' + fmt(needLeg) + ' poin</b> lagi ke <b>ECO LEGEND (' + fmt(legScore) + ')</b> ' +
-      '<span class="t-badge limited">LIMITED STICKER</span> atau kejar <b>' + fmt(chpScore) + '</b> <span class="t-badge utama">HADIAH UTAMA</span>';
-    cta.innerHTML = OVER_CTAS_PROGRESS[ctaIdx % OVER_CTAS_PROGRESS.length];
+    el.innerHTML = '<div class="o-prog"><b>' + fmt(needLeg) + ' POIN</b> MENUJU ECO LEGEND</div>';
+    const pool = res.position === 1 ? OVER_CTAS_BELOW_LEGEND.slice(0, 2) : OVER_CTAS_BELOW_LEGEND;
+    cta.innerHTML = pool[ctaIdx % pool.length];
     ctaIdx++;
   }
   return st;
@@ -343,10 +341,8 @@ function showOver(res, animate = true) {
   $('o-dist').textContent = km(res.meters) + ' KM';
   $('o-plastic').textContent = String(res.plastic);
   $('o-combo').textContent = 'x' + (res.maxLevel + 1);
-  $('o-rank-name').textContent = res.rank.id === 'champion' ? '🏆 ECO CHAMPION' : res.rank.id === 'legend' ? '🟢 ECO LEGEND' : res.rank.name;
-  $('o-rank-pos').textContent = res.position === 1
-    ? (res.rank.id === 'champion' ? '#1 LEADERBOARD • HADIAH UTAMA BOOTH' : '#1 LEADERBOARD')
-    : res.position ? 'LEADERBOARD #' + res.position : 'KEEP RUNNING!';
+  $('o-rank-name').textContent = res.rank.id === 'champion' ? '🏆 ECO CHAMPION' : res.rank.id === 'legend' ? '🎁 ECO LEGEND' : res.rank.name;
+  $('o-rank-pos').textContent = res.position ? '#' + res.position + ' LEADERBOARD' : 'TOP 10 MENUNGGU';
   const rk = $('o-rank'); rk.classList.remove('show'); void rk.offsetWidth;
   rewardLine(res);
   $('o-reward').style.visibility = 'hidden';
@@ -369,9 +365,9 @@ function showClaim(info, res) {
   card.className = 'card narrow ticket tier-' + info.rank.id;
   const badge = $('c-badge');
   badge.className = 'c-badge ' + (isChamp ? 'utama' : 'limited');
-  badge.textContent = info.badge || (isChamp ? 'HADIAH UTAMA BOOTH' : 'LIMITED STICKER');
+  badge.textContent = info.badge || (isChamp ? 'STIKER JUARA' : 'LIMITED');
   $('c-title').textContent = 'REWARD CLAIMED!';
-  $('c-rank').textContent = isChamp ? '🏆 ECO CHAMPION' : '🟢 ECO LEGEND';
+  $('c-rank').textContent = isChamp ? '🏆 ECO CHAMPION' : '🎁 ECO LEGEND';
   $('c-score').textContent = fmt(res.score);
   $('c-prize').textContent = info.fullPrize || info.prize;
   $('c-code').textContent = info.code;

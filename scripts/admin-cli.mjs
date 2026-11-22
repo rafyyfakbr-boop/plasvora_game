@@ -41,7 +41,8 @@ function printHelp() {
   console.log('\n  [UBAH STOK & HADIAH (HANYA 2 TIER HADIAH: LEGEND & CHAMPION)]');
   console.log('    npm run admin:set-stock legend 5');
   console.log('    npm run admin:set-stock champion 1');
-  console.log('    npm run admin:set-score <legend|champion> <skor>');
+  console.log('    npm run admin:set-score legend 7000');
+  console.log('    npm run admin:set-score champion 11000');
   console.log('    npm run admin:set-reward <legend|champion> "<nama hadiah>"');
   console.log('\n  [OPERASI DESTRUKTIF — BUTUH KONFIRMASI MANUAL]');
   console.log('    npm run admin:reset-stock');

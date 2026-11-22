@@ -1,4 +1,4 @@
-// reward.js - sistem 2 hadiah booth (ECO LEGEND = Sticker Limited, ECO CHAMPION = HADIAH UTAMA BOOTH),
+// reward.js - sistem 2 hadiah booth (ECO LEGEND = STICKER LIMITED, ECO CHAMPION = STIKER JUARA),
 // manajemen stok, pencegahan double claim, pencatatan waktu/rank klaim, dan sinkronisasi revisi Admin Manual Mode.
 import { C, RANKS, rankFor } from './config.js';
 import { Storage, KEYS } from './storage.js';

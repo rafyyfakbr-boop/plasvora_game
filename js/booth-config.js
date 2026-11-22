@@ -18,20 +18,20 @@ export const BOOTH_CONFIG = {
   },
   "rewards": {
     "legend": {
-      "minScore": 5000,
+      "minScore": 7000,
       "stock": 5,
       "rank": "ECO LEGEND",
-      "prize": "Sticker Limited",
-      "fullPrize": "Sticker Limited",
-      "badge": "LIMITED STICKER"
+      "prize": "STICKER LIMITED",
+      "fullPrize": "STICKER LIMITED",
+      "badge": "LIMITED"
     },
     "champion": {
-      "minScore": 8000,
+      "minScore": 11000,
       "stock": 1,
       "rank": "ECO CHAMPION",
-      "prize": "HADIAH UTAMA BOOTH",
-      "fullPrize": "HADIAH UTAMA BOOTH",
-      "badge": "HADIAH UTAMA BOOTH"
+      "prize": "STIKER JUARA",
+      "fullPrize": "STIKER JUARA",
+      "badge": "STIKER JUARA"
     }
   }
 };

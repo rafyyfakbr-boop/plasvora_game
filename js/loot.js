@@ -354,7 +354,7 @@ export class LootDirector {
       this.prevWasPower = true;
     } else {
       const tier = this.pickLootTier(phase, false);
-      // Jumlah terkontrol: plastic 1-2 (jarang 3), recycled/rare/gold tunggal agar x8 & 8.000+ butuh skill nyata
+      // Jumlah terkontrol: plastic 1-2 (jarang 3), recycled/rare/gold tunggal agar x8 & 11.000+ butuh skill nyata
       let count = 1;
       if (tier === 'normal') count = rng.weighted({ 1: 78, 2: 20, 3: 2 }) | 0;
       else if (tier === 'recycled') count = 1;

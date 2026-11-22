@@ -83,7 +83,7 @@ export const C = {
 
   SPEED: { MIN: 1.0, MAX: 1.8 },
 
-  // Skor terkontrol agar ECO CHAMPION (8.000+) benar-benar menuntut skill, combo tinggi, dan konsistensi.
+  // Skor terkontrol agar ECO LEGEND (7.000+) & ECO CHAMPION (11.000+) benar-benar menuntut skill, combo tinggi, dan konsistensi.
   SCORE: {
     normal: 50,        // Plastic
     recycled: 100,     // Recycled Material
@@ -180,7 +180,7 @@ export const C = {
     car:       { need: 'jump',  tier: 'hard',   size: 'long',   hitW: 2.75, hitH: 1.38, hitY: 0.69, hitDx: 0, warning: true,  name: 'Mobil bekas' }
   },
 
-  // Rank progress (tanpa hadiah fisik) & 2 tier hadiah utama booth (ECO LEGEND & ECO CHAMPION)
+  // Rank progress (tanpa hadiah fisik) & 2 tier hadiah booth (ECO LEGEND & ECO CHAMPION)
   REVISIONS: BOOTH_CONFIG.revisions,
   PROGRESS_RANKS: BOOTH_CONFIG.ranks,
   REWARDS: BOOTH_CONFIG.rewards,

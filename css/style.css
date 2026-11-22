@@ -213,26 +213,30 @@ kbd{display:inline-block;min-width:1.8em;padding:.1em .5em;border:.1em solid cur
 
 /* ---------- game over ---------- */
 .over{background:linear-gradient(180deg,rgba(1,10,8,.82),rgba(1,10,8,.94));align-items:center;justify-content:center}
-.over-col{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.55em;width:54em}
-.go{margin:0;font:900 4.2em/1 var(--font);color:var(--red);text-shadow:0 0 .3em rgba(255,77,109,.55)}
-.who{font:900 1.15em var(--font);letter-spacing:.16em;color:var(--muted)}
+.over-col{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.62em;width:48em}
+.go{margin:0;font:900 4.4em/1 var(--font);color:var(--red);text-shadow:0 0 .3em rgba(255,77,109,.55)}
+.who{font:900 1.15em var(--font);letter-spacing:.18em;color:var(--muted)}
 .o-score small,.o-stats small{display:block;font:700 .75em var(--body);letter-spacing:.2em;color:var(--cyan)}
-.o-score b{display:block;font:900 5.4em/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums}
-.o-rank{font:900 1.75em/1.2 var(--font);color:var(--ink);opacity:0;transform:scale(.6);display:flex;gap:.5em;align-items:center;flex-wrap:wrap;justify-content:center}
+.o-score b{display:block;font:900 5.8em/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums}
+.o-rank{font:900 1.8em/1.15 var(--font);color:var(--ink);opacity:0;transform:scale(.6);display:flex;gap:.55em;align-items:center;flex-wrap:wrap;justify-content:center}
 .o-rank .sep{color:var(--green)}
 .o-rank.show{animation:rankin .8s cubic-bezier(.2,1.5,.4,1) forwards}
-.o-reward{min-height:2.4em;font:800 1em var(--body);color:#d6fff0;width:100%;max-width:36em}
+.o-reward{min-height:1.8em;font:800 1em var(--body);color:#d6fff0;display:flex;justify-content:center}
 .o-reward b{color:var(--gold)}.o-reward.out b{color:var(--red)}
-.rw-unlock{padding:.65em 1.1em;border-radius:.8em;display:flex;flex-direction:column;gap:.22em;align-items:center}
-.rw-unlock.legend{background:rgba(44,240,143,.11);border:.12em solid var(--green);box-shadow:0 0 1.2em rgba(44,240,143,.18)}
-.rw-unlock.legend b{color:var(--green);font:900 1.18em var(--font);letter-spacing:.04em}
-.rw-unlock.champion{background:linear-gradient(135deg,rgba(255,210,63,.22),rgba(255,157,46,.12));border:.14em solid var(--gold);box-shadow:0 0 1.6em rgba(255,210,63,.28)}
-.rw-unlock.champion b{color:var(--gold);font:900 1.32em var(--font);letter-spacing:.05em}
-.o-cta{font:800 .92em/1.35 var(--body);color:#d6fff0;background:rgba(2,22,17,.78);border:.09em dashed rgba(25,212,255,.45);border-radius:.7em;padding:.45em 1.1em;max-width:36em}
+.o-prog{font:800 1.02em/1.2 var(--body);letter-spacing:.1em;color:#bce8d8}
+.o-prog b{color:var(--cyan);font-family:var(--font)}
+.rw-unlock{padding:.55em 1.4em;border-radius:.75em;display:inline-flex;flex-direction:column;gap:.16em;align-items:center}
+.rw-unlock.legend{background:rgba(44,240,143,.12);border:.12em solid var(--green);box-shadow:0 0 1.1em rgba(44,240,143,.2)}
+.rw-unlock.legend b{color:var(--green);font:900 1.15em/1.1 var(--font);letter-spacing:.05em}
+.rw-unlock.legend span{font:800 .82em var(--body);letter-spacing:.14em;color:#d8fff0}
+.rw-unlock.champion{background:linear-gradient(135deg,rgba(255,210,63,.24),rgba(255,157,46,.12));border:.14em solid var(--gold);box-shadow:0 0 1.6em rgba(255,210,63,.3)}
+.rw-unlock.champion b{color:var(--gold);font:900 1.3em/1.1 var(--font);letter-spacing:.06em}
+.rw-unlock.champion span{font:900 .86em var(--body);letter-spacing:.16em;color:#fff4c2}
+.o-stats{display:flex;gap:3.2em;margin-top:.15em}.o-stats b{font:900 1.5em var(--font);color:var(--ink)}
+.over .btns.row{justify-content:center;margin-top:.35em}
+.o-cta{font:800 .84em/1.2 var(--body);letter-spacing:.1em;color:var(--muted);margin-top:.15em}
 .o-cta b{color:var(--gold)}.o-cta em{font-style:normal;color:var(--green);font-weight:900}
-.o-stats{display:flex;gap:3em}.o-stats b{font:900 1.45em var(--font);color:var(--ink)}
-.over .btns.row{justify-content:center;margin-top:.3em}
-.o-foot{display:flex;gap:1em;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:.5em;font-size:.88em;color:var(--muted)}
+.o-foot{display:flex;gap:1em;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:.45em;font-size:.86em;color:var(--muted)}
 
 /* ---------- reward ---------- */
 .ticket{text-align:center;align-items:center}

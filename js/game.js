@@ -154,10 +154,10 @@ export function createGame() {
         const isChamp = r.id === 'champion';
         const isLegend = r.id === 'legend';
         const sub = isChamp
-          ? '🏆 HADIAH UTAMA BOOTH TERBUKA!'
+          ? '👑 STIKER JUARA TERBUKA!'
           : isLegend
-            ? '🎁 STICKER LIMITED PLASVORA TERBUKA!'
-            : 'PROGRESS RANK • KEJAR ECO LEGEND (5.000)';
+            ? '🎁 STICKER LIMITED TERBUKA!'
+            : 'KEJAR ECO LEGEND (' + C.REWARDS.legend.minScore.toLocaleString('id-ID') + ')';
         UI.feedback.push({
           text: isChamp ? '🏆 ECO CHAMPION! ★' : isLegend ? 'ECO LEGEND UNLOCKED!' : r.name + '!',
           sub,
