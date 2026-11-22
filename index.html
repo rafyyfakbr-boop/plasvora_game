@@ -1,263 +1,295 @@
 <!doctype html>
 <html lang="id">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PLASVORA ECO RUNNER</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PLASVORA ECO RUNNER</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
-<div class="stage" id="stage">
-  <canvas id="gl" aria-label="Plasvora Eco Runner"></canvas>
-  <div class="flash" id="flash"></div>
-  <canvas id="confetti"></canvas>
+  <div class="stage" id="stage">
+    <canvas id="gl" aria-label="Plasvora Eco Runner"></canvas>
+    <div class="flash" id="flash"></div>
+    <canvas id="confetti"></canvas>
 
-  <div class="ui" id="ui">
+    <div class="ui" id="ui">
 
-    <!-- HUD -->
-    <div class="hud" id="hud" hidden>
-      <div class="hud-l">
-        <div class="brand"><span class="mark">&#9851;</span><div><b>PLASVORA</b><small>ECO RUNNER</small></div></div>
-        <div class="hearts" id="h-hearts"></div>
-        <div class="phase-pill p1" id="h-phase">P1 &bull; ECO START</div>
-        <div class="combo" id="h-combo" hidden>COMBO <b id="h-combo-n">x2</b></div>
-      </div>
-      <div class="hud-c">
-        <small>SCORE</small>
-        <b id="h-score">0</b>
-        <div class="tier-box" id="h-tier-box">
-          <div class="tier-head"><span id="h-tier-name">ECO ROOKIE</span><span id="h-tier-next">NEXT: ECO HERO &mdash; 1.000</span></div>
-          <div class="tier-bar"><i id="h-tier-fill"></i></div>
+      <!-- HUD -->
+      <div class="hud" id="hud" hidden>
+        <div class="hud-l">
+          <div class="brand"><span class="mark">&#9851;</span>
+            <div><b>PLASVORA</b><small>ECO RUNNER</small></div>
+          </div>
+          <div class="hearts" id="h-hearts"></div>
+          <div class="phase-pill p1" id="h-phase">P1 &bull; ECO START</div>
+          <div class="combo" id="h-combo" hidden>COMBO <b id="h-combo-n">x2</b></div>
         </div>
-      </div>
-      <div class="hud-r">
-        <div class="r-row hi"><small>HIGH SCORE</small><b id="h-high">0</b></div>
-        <div class="r-row"><small>DISTANCE</small><b><span id="h-dist">0.00</span> KM</b></div>
-        <div class="r-row"><small>PLASTIC</small><b id="h-plastic">0</b></div>
-        <div class="r-row"><small>SPEED</small><b><span id="h-speed">1.00</span>x</b></div>
-      </div>
-      <div class="boss-bar" id="h-boss" hidden><small><span id="h-boss-name">ECO BOSS</span> &bull; BERTAHAN <b id="h-boss-t">12</b> DETIK</small><i><u id="h-boss-fill"></u></i></div>
-      <div class="warn-edge" id="h-warn" hidden><b id="h-warn-ic">&#9650;</b><small id="h-warn-txt">JUMP</small></div>
-      <div class="powers" id="h-powers"></div>
-      <div class="ctrl-hint" id="h-hint"><kbd>SPACE</kbd> / <kbd>&uarr;</kbd> LOMPAT <span>&nbsp;&nbsp;</span> <kbd>&darr;</kbd> SLIDE</div>
-    </div>
-
-    <!-- umpan balik: satu slot besar + teks kecil di dekat robot -->
-    <div class="fb-center" id="fb-center" hidden><b id="fb-text"></b><small id="fb-sub"></small></div>
-    <div class="floats" id="floats"></div>
-    <div class="countdown" id="countdown" hidden></div>
-    <div class="runtag" id="runtag" hidden></div>
-
-    <!-- MENU -->
-    <section class="screen menu" id="scr-menu" hidden>
-      <div class="menu-col">
-        <div class="logo"><span class="mark big">&#9851;</span> PLASVORA</div>
-        <h1>ECO<br>RUNNER</h1>
-        <p class="tag">Recycle &bull; Reuse &bull; Reimagine</p>
-        <div class="btns">
-          <button class="btn primary" id="b-play" type="button">PLAY</button>
-          <button class="btn" id="b-lb" type="button">LEADERBOARD</button>
-          <button class="btn" id="b-how" type="button">HOW TO PLAY</button>
-          <button class="btn" id="b-set" type="button">SETTINGS</button>
-        </div>
-        <p class="hint">Tekan <kbd>ENTER</kbd> untuk main &nbsp;&bull;&nbsp; <kbd>F</kbd> layar penuh</p>
-      </div>
-      <div class="menu-prize">
-        <div class="mp-head">&#127873; KEJAR HADIAHNYA!</div>
-        <div class="mp-tier leg">
-          <span class="mp-ic">&#128994;</span>
-          <div class="mp-body">
-            <div class="mp-top"><b>ECO LEGEND</b><span>7.000+ POIN</span></div>
-            <p>Dapatkan <b>STICKER LIMITED</b></p>
-            <em class="t-badge limited">LIMITED</em>
+        <div class="hud-c">
+          <small>SCORE</small>
+          <b id="h-score">0</b>
+          <div class="tier-box" id="h-tier-box">
+            <div class="tier-head"><span id="h-tier-name">ECO ROOKIE</span><span id="h-tier-next">NEXT: ECO HERO &mdash;
+                1.000</span></div>
+            <div class="tier-bar"><i id="h-tier-fill"></i></div>
           </div>
         </div>
-        <div class="mp-tier chp">
-          <span class="mp-ic">&#127942;</span>
-          <div class="mp-body">
-            <div class="mp-top"><b>ECO CHAMPION</b><span>11.000+ POIN</span></div>
-            <p>Raih <b>STIKER JUARA!</b></p>
-            <em class="t-badge utama">STIKER JUARA</em>
+        <div class="hud-r">
+          <div class="r-row hi"><small>HIGH SCORE</small><b id="h-high">0</b></div>
+          <div class="r-row"><small>DISTANCE</small><b><span id="h-dist">0.00</span> KM</b></div>
+          <div class="r-row"><small>PLASTIC</small><b id="h-plastic">0</b></div>
+          <div class="r-row"><small>SPEED</small><b><span id="h-speed">1.00</span>x</b></div>
+        </div>
+        <div class="boss-bar" id="h-boss" hidden><small><span id="h-boss-name">ECO BOSS</span> &bull; BERTAHAN <b
+              id="h-boss-t">12</b> DETIK</small><i><u id="h-boss-fill"></u></i></div>
+        <div class="warn-edge" id="h-warn" hidden><b id="h-warn-ic">&#9650;</b><small id="h-warn-txt">JUMP</small></div>
+        <div class="powers" id="h-powers"></div>
+        <div class="ctrl-hint" id="h-hint"><kbd>SPACE</kbd> / <kbd>&uarr;</kbd> LOMPAT <span>&nbsp;&nbsp;</span>
+          <kbd>&darr;</kbd> SLIDE</div>
+      </div>
+
+      <!-- umpan balik: satu slot besar + teks kecil di dekat robot -->
+      <div class="fb-center" id="fb-center" hidden><b id="fb-text"></b><small id="fb-sub"></small></div>
+      <div class="floats" id="floats"></div>
+      <div class="countdown" id="countdown" hidden></div>
+      <div class="runtag" id="runtag" hidden></div>
+
+      <!-- MENU -->
+      <section class="screen menu" id="scr-menu" hidden>
+        <div class="menu-col">
+          <div class="logo"><span class="mark big">&#9851;</span> PLASVORA</div>
+          <h1>ECO<br>RUNNER</h1>
+          <p class="tag">Recycle &bull; Reuse &bull; Reimagine</p>
+          <div class="btns">
+            <button class="btn primary" id="b-play" type="button">PLAY</button>
+            <button class="btn" id="b-lb" type="button">LEADERBOARD</button>
+            <button class="btn" id="b-how" type="button">HOW TO PLAY</button>
+            <button class="btn" id="b-set" type="button">SETTINGS</button>
           </div>
+          <p class="hint">Tekan <kbd>ENTER</kbd> untuk main &nbsp;&bull;&nbsp; <kbd>F</kbd> layar penuh</p>
         </div>
-        <div class="mp-cta" id="menu-cta">&#127942; Jadi <b>#1 LEADERBOARD</b> &amp; buktikan kamu adalah <b>ECO CHAMPION!</b></div>
-      </div>
-    </section>
-
-    <!-- NAMA -->
-    <section class="screen center" id="scr-name" hidden>
-      <div class="card narrow">
-        <h2>NAMA KAMU</h2>
-        <input id="nick" type="text" maxlength="10" placeholder="PLAYER" autocomplete="off" spellcheck="false">
-        <p class="small">Maksimal 10 huruf. Kosong menjadi PLAYER.</p>
-        <div class="btns row"><button class="btn primary" id="b-start" type="button">START RUN</button><button class="btn ghost" id="b-name-back" type="button">KEMBALI</button></div>
-      </div>
-    </section>
-
-    <!-- HOW TO PLAY -->
-    <section class="screen center" id="scr-how" hidden>
-      <div class="card">
-        <h2>HOW TO PLAY</h2>
-        <div class="keys">
-          <div class="key"><div class="caps"><kbd>SPACE</kbd><kbd>&uarr;</kbd></div><b>JUMP</b></div>
-          <div class="key"><div class="caps"><kbd>&darr;</kbd></div><b>SLIDE</b></div>
-          <div class="key"><div class="caps"><kbd>P</kbd><kbd>ESC</kbd></div><b>PAUSE</b></div>
-        </div>
-        <ul class="tips"><li>Kumpulkan Plastic, Recycled, Rare &amp; Golden Material.</li><li>Hindari obstacle &amp; kombinasi dengan lompat atau slide.</li><li>Jaga combo hingga x8 (Shield menyelamatkan combo!).</li><li>Kejar 7.000+ untuk STICKER LIMITED &amp; 11.000+ untuk STIKER JUARA.</li></ul>
-        <div class="btns row"><button class="btn primary" id="how-back" type="button">MENGERTI</button></div>
-      </div>
-    </section>
-
-    <!-- SETTINGS -->
-    <section class="screen center" id="scr-set" hidden>
-      <div class="card narrow">
-        <h2>SETTINGS</h2>
-        <label class="slide-row" for="vol-music"><span>MUSIC</span><input id="vol-music" type="range" min="0" max="100" step="5"><output id="o-music"></output></label>
-        <label class="slide-row" for="vol-sfx"><span>SFX</span><input id="vol-sfx" type="range" min="0" max="100" step="5"><output id="o-sfx"></output></label>
-        <div class="btns row">
-          <button class="btn" id="b-full" type="button">LAYAR PENUH</button>
-          <button class="btn ghost" id="b-admin" type="button">ADMIN</button>
-          <button class="btn primary" id="set-back" type="button">SELESAI</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ADMIN -->
-    <section class="screen center dim" id="scr-admin" hidden>
-      <div class="card admin-card">
-        <div class="adm-head">
-          <h2>ADMIN BOOTH</h2>
-          <div class="adm-tabs" id="adm-tabs" hidden>
-            <button class="adm-tab active" id="adm-tab-stock" type="button">STOK &amp; KLAIM</button>
-            <button class="adm-tab" id="adm-tab-manual" type="button">MODE MANUAL</button>
-          </div>
-        </div>
-        <div id="adm-pin">
-          <p class="small">Masukkan PIN panitia.</p>
-          <input id="adm-pin-in" type="password" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="PIN">
-          <p class="small bad" id="adm-err" hidden>PIN salah.</p>
-        </div>
-        <div id="adm-panel" hidden>
-          <div id="adm-view-stock">
-            <table class="stock" id="adm-stock"></table>
-            <div class="adm-meta">
-              <p class="small" id="adm-claims"></p>
-              <div class="adm-recent" id="adm-recent"></div>
+        <div class="menu-prize">
+          <div class="mp-head">&#127873; KEJAR HADIAHNYA!</div>
+          <div class="mp-tier leg">
+            <span class="mp-ic">&#128994;</span>
+            <div class="mp-body">
+              <div class="mp-top"><b>ECO LEGEND</b><span>7.000+ POIN</span></div>
+              <p>Dapatkan <b>STICKER LIMITED</b></p>
+              <em class="t-badge limited">LIMITED</em>
             </div>
-            <div class="adm-confirm" id="adm-confirm" hidden>
-              <b>PERINGATAN: COMMAND INI AKAN MENGUBAH DATA BOOTH.</b>
-              <p class="small" id="adm-confirm-msg">Pastikan Anda ingin melanjutkan sebelum menjalankannya.</p>
-              <code id="adm-confirm-cmd"></code>
-              <div class="btns row">
-                <button class="btn danger small" id="adm-confirm-yes" type="button">KONFIRMASI</button>
-                <button class="btn ghost small" id="adm-confirm-no" type="button">BATAL</button>
+          </div>
+          <div class="mp-tier chp">
+            <span class="mp-ic">&#127942;</span>
+            <div class="mp-body">
+              <div class="mp-top"><b>ECO CHAMPION</b><span>11.000+ POIN</span></div>
+              <p>Raih <b>STICKER JUARA!</b></p>
+              <em class="t-badge utama">STICKER JUARA</em>
+            </div>
+          </div>
+          <div class="mp-cta" id="menu-cta">&#127942; Jadi <b>#1 LEADERBOARD</b> &amp; buktikan kamu adalah <b>ECO
+              CHAMPION!</b></div>
+        </div>
+      </section>
+
+      <!-- NAMA -->
+      <section class="screen center" id="scr-name" hidden>
+        <div class="card narrow">
+          <h2>NAMA KAMU</h2>
+          <input id="nick" type="text" maxlength="10" placeholder="PLAYER" autocomplete="off" spellcheck="false">
+          <p class="small">Maksimal 10 huruf. Kosong menjadi PLAYER.</p>
+          <div class="btns row"><button class="btn primary" id="b-start" type="button">START RUN</button><button
+              class="btn ghost" id="b-name-back" type="button">KEMBALI</button></div>
+        </div>
+      </section>
+
+      <!-- HOW TO PLAY -->
+      <section class="screen center" id="scr-how" hidden>
+        <div class="card">
+          <h2>HOW TO PLAY</h2>
+          <div class="keys">
+            <div class="key">
+              <div class="caps"><kbd>SPACE</kbd><kbd>&uarr;</kbd></div><b>JUMP</b>
+            </div>
+            <div class="key">
+              <div class="caps"><kbd>&darr;</kbd></div><b>SLIDE</b>
+            </div>
+            <div class="key">
+              <div class="caps"><kbd>P</kbd><kbd>ESC</kbd></div><b>PAUSE</b>
+            </div>
+          </div>
+          <ul class="tips">
+            <li>Kumpulkan Plastic, Recycled, Rare &amp; Golden Material.</li>
+            <li>Hindari obstacle &amp; kombinasi dengan lompat atau slide.</li>
+            <li>Jaga combo hingga x8 (Shield menyelamatkan combo!).</li>
+            <li>Kejar 7.000+ untuk STICKER LIMITED &amp; 11.000+ untuk STICKER JUARA.</li>
+          </ul>
+          <div class="btns row"><button class="btn primary" id="how-back" type="button">MENGERTI</button></div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="screen center" id="scr-set" hidden>
+        <div class="card narrow">
+          <h2>SETTINGS</h2>
+          <label class="slide-row" for="vol-music"><span>MUSIC</span><input id="vol-music" type="range" min="0"
+              max="100" step="5"><output id="o-music"></output></label>
+          <label class="slide-row" for="vol-sfx"><span>SFX</span><input id="vol-sfx" type="range" min="0" max="100"
+              step="5"><output id="o-sfx"></output></label>
+          <div class="btns row">
+            <button class="btn" id="b-full" type="button">LAYAR PENUH</button>
+            <button class="btn ghost" id="b-admin" type="button">ADMIN</button>
+            <button class="btn primary" id="set-back" type="button">SELESAI</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADMIN -->
+      <section class="screen center dim" id="scr-admin" hidden>
+        <div class="card admin-card">
+          <div class="adm-head">
+            <h2>ADMIN BOOTH</h2>
+            <div class="adm-tabs" id="adm-tabs" hidden>
+              <button class="adm-tab active" id="adm-tab-stock" type="button">STOK &amp; KLAIM</button>
+              <button class="adm-tab" id="adm-tab-manual" type="button">MODE MANUAL</button>
+            </div>
+          </div>
+          <div id="adm-pin">
+            <p class="small">Masukkan PIN panitia.</p>
+            <input id="adm-pin-in" type="password" inputmode="numeric" maxlength="8" autocomplete="off"
+              placeholder="PIN">
+            <p class="small bad" id="adm-err" hidden>PIN salah.</p>
+          </div>
+          <div id="adm-panel" hidden>
+            <div id="adm-view-stock">
+              <table class="stock" id="adm-stock"></table>
+              <div class="adm-meta">
+                <p class="small" id="adm-claims"></p>
+                <div class="adm-recent" id="adm-recent"></div>
+              </div>
+              <div class="adm-confirm" id="adm-confirm" hidden>
+                <b>PERINGATAN: COMMAND INI AKAN MENGUBAH DATA BOOTH.</b>
+                <p class="small" id="adm-confirm-msg">Pastikan Anda ingin melanjutkan sebelum menjalankannya.</p>
+                <code id="adm-confirm-cmd"></code>
+                <div class="btns row">
+                  <button class="btn danger small" id="adm-confirm-yes" type="button">KONFIRMASI</button>
+                  <button class="btn ghost small" id="adm-confirm-no" type="button">BATAL</button>
+                </div>
               </div>
             </div>
-          </div>
-          <div id="adm-view-manual" hidden>
-            <div class="adm-manual-notice">
-              <b>ADMIN ACTION REQUIRED</b>
-              <p class="small">Untuk melakukan perubahan secara manual, jalankan command berikut di terminal:</p>
+            <div id="adm-view-manual" hidden>
+              <div class="adm-manual-notice">
+                <b>ADMIN ACTION REQUIRED</b>
+                <p class="small">Untuk melakukan perubahan secara manual, jalankan command berikut di terminal:</p>
+              </div>
+              <div class="adm-warn-strip">
+                <b>PERINGATAN: COMMAND INI AKAN MENGUBAH DATA BOOTH.</b>
+                <span>Pastikan Anda ingin melanjutkan sebelum menjalankannya. Semua command ubah/reset membutuhkan
+                  konfirmasi manual <code>YA</code> di terminal.</span>
+              </div>
+              <div class="adm-cmds" id="adm-cmds"></div>
             </div>
-            <div class="adm-warn-strip">
-              <b>PERINGATAN: COMMAND INI AKAN MENGUBAH DATA BOOTH.</b>
-              <span>Pastikan Anda ingin melanjutkan sebelum menjalankannya. Semua command ubah/reset membutuhkan konfirmasi manual <code>YA</code> di terminal.</span>
-            </div>
-            <div class="adm-cmds" id="adm-cmds"></div>
+          </div>
+          <div class="btns row">
+            <button class="btn primary" id="adm-ok" type="button">MASUK</button>
+            <button class="btn ghost small" id="adm-reset" type="button" hidden>RESET STOK</button>
+            <button class="btn ghost small" id="adm-reset-claims" type="button" hidden>RESET KLAIM</button>
+            <button class="btn ghost small" id="adm-clear" type="button" hidden>RESET LEADERBOARD</button>
+            <button class="btn ghost" id="adm-back" type="button">TUTUP</button>
           </div>
         </div>
-        <div class="btns row">
-          <button class="btn primary" id="adm-ok" type="button">MASUK</button>
-          <button class="btn ghost small" id="adm-reset" type="button" hidden>RESET STOK</button>
-          <button class="btn ghost small" id="adm-reset-claims" type="button" hidden>RESET KLAIM</button>
-          <button class="btn ghost small" id="adm-clear" type="button" hidden>RESET LEADERBOARD</button>
-          <button class="btn ghost" id="adm-back" type="button">TUTUP</button>
+      </section>
+
+      <!-- PAUSE -->
+      <section class="screen center dim" id="scr-pause" hidden>
+        <div class="card narrow">
+          <h2>PAUSED</h2>
+          <div class="btns">
+            <button class="btn primary" id="p-resume" type="button">RESUME</button>
+            <button class="btn" id="p-restart" type="button">RESTART</button>
+            <button class="btn" id="p-set" type="button">SETTINGS</button>
+            <button class="btn ghost" id="p-menu" type="button">MAIN MENU</button>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- PAUSE -->
-    <section class="screen center dim" id="scr-pause" hidden>
-      <div class="card narrow">
-        <h2>PAUSED</h2>
-        <div class="btns">
-          <button class="btn primary" id="p-resume" type="button">RESUME</button>
-          <button class="btn" id="p-restart" type="button">RESTART</button>
-          <button class="btn" id="p-set" type="button">SETTINGS</button>
-          <button class="btn ghost" id="p-menu" type="button">MAIN MENU</button>
+      <!-- GAME OVER -->
+      <section class="screen over" id="scr-over" hidden>
+        <div class="over-col">
+          <h2 class="go">GAME OVER</h2>
+          <div class="who" id="o-name"></div>
+          <div class="o-score"><small>SCORE</small><b id="o-score">0</b></div>
+          <div class="o-rank" id="o-rank"><span id="o-rank-name"></span><span class="sep">&bull;</span><span
+              id="o-rank-pos"></span></div>
+          <div class="o-reward" id="o-reward"></div>
+          <div class="o-stats">
+            <div><small>DISTANCE</small><b id="o-dist">0.00 KM</b></div>
+            <div><small>PLASTIC</small><b id="o-plastic">0</b></div>
+            <div><small>COMBO MAX</small><b id="o-combo">x1</b></div>
+          </div>
+          <div class="btns row">
+            <button class="btn accent" id="o-claim" type="button" hidden>CLAIM REWARD</button>
+            <button class="btn primary" id="o-again" type="button">PLAY AGAIN</button>
+            <button class="btn" id="o-lb" type="button">LEADERBOARD</button>
+          </div>
+          <div class="o-cta" id="o-cta"></div>
+          <div class="o-foot"><span>&#9851; Sampah yang kamu kumpulkan bisa menjadi sesuatu yang baru.</span><button
+              class="link" id="o-explore" type="button">EXPLORE PLASVORA</button><button class="link" id="o-menu"
+              type="button">MAIN MENU</button></div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- GAME OVER -->
-    <section class="screen over" id="scr-over" hidden>
-      <div class="over-col">
-        <h2 class="go">GAME OVER</h2>
-        <div class="who" id="o-name"></div>
-        <div class="o-score"><small>SCORE</small><b id="o-score">0</b></div>
-        <div class="o-rank" id="o-rank"><span id="o-rank-name"></span><span class="sep">&bull;</span><span id="o-rank-pos"></span></div>
-        <div class="o-reward" id="o-reward"></div>
-        <div class="o-stats">
-          <div><small>DISTANCE</small><b id="o-dist">0.00 KM</b></div>
-          <div><small>PLASTIC</small><b id="o-plastic">0</b></div>
-          <div><small>COMBO MAX</small><b id="o-combo">x1</b></div>
+      <!-- REWARD -->
+      <section class="screen center dim" id="scr-claim" hidden>
+        <div class="card narrow ticket" id="c-card">
+          <div class="c-badge" id="c-badge"></div>
+          <h2 class="gold" id="c-title">REWARD CLAIMED!</h2>
+          <div class="c-rank" id="c-rank"></div>
+          <div class="c-line"><small>SCORE</small><b id="c-score"></b></div>
+          <div class="c-line"><small>REWARD UNLOCKED</small><b class="gold" id="c-prize"></b></div>
+          <div class="code"><small>CLAIM CODE</small><b id="c-code"></b></div>
+          <p class="cta">Tunjukkan kode ini ke petugas booth.<br>Kenali dan manfaatkan material daur ulang bersama
+            <b>PLASVORA</b>.</p>
+          <div class="btns row"><button class="btn primary" id="c-finish" type="button">FINISH</button><button
+              class="btn accent" id="c-explore" type="button">EXPLORE PLASVORA</button></div>
         </div>
-        <div class="btns row">
-          <button class="btn accent" id="o-claim" type="button" hidden>CLAIM REWARD</button>
-          <button class="btn primary" id="o-again" type="button">PLAY AGAIN</button>
-          <button class="btn" id="o-lb" type="button">LEADERBOARD</button>
+      </section>
+
+      <!-- INFO PLASVORA -->
+      <section class="screen center dim" id="scr-explore" hidden>
+        <div class="card narrow">
+          <h2>PLASVORA</h2>
+          <p class="lead">Recycle &bull; Reuse &bull; Reimagine</p>
+          <p class="small">Tanyakan ke petugas booth untuk mengenal dan memanfaatkan material daur ulang bersama
+            Plasvora.</p>
+          <div class="btns row"><button class="btn primary" id="x-back" type="button">KEMBALI</button></div>
         </div>
-        <div class="o-cta" id="o-cta"></div>
-        <div class="o-foot"><span>&#9851; Sampah yang kamu kumpulkan bisa menjadi sesuatu yang baru.</span><button class="link" id="o-explore" type="button">EXPLORE PLASVORA</button><button class="link" id="o-menu" type="button">MAIN MENU</button></div>
-      </div>
-    </section>
+      </section>
 
-    <!-- REWARD -->
-    <section class="screen center dim" id="scr-claim" hidden>
-      <div class="card narrow ticket" id="c-card">
-        <div class="c-badge" id="c-badge"></div>
-        <h2 class="gold" id="c-title">REWARD CLAIMED!</h2>
-        <div class="c-rank" id="c-rank"></div>
-        <div class="c-line"><small>SCORE</small><b id="c-score"></b></div>
-        <div class="c-line"><small>REWARD UNLOCKED</small><b class="gold" id="c-prize"></b></div>
-        <div class="code"><small>CLAIM CODE</small><b id="c-code"></b></div>
-        <p class="cta">Tunjukkan kode ini ke petugas booth.<br>Kenali dan manfaatkan material daur ulang bersama <b>PLASVORA</b>.</p>
-        <div class="btns row"><button class="btn primary" id="c-finish" type="button">FINISH</button><button class="btn accent" id="c-explore" type="button">EXPLORE PLASVORA</button></div>
-      </div>
-    </section>
+      <!-- LEADERBOARD -->
+      <section class="screen center" id="scr-lb" hidden>
+        <div class="card wide">
+          <h2>&#127942; TOP ECO RUNNERS</h2>
+          <div class="lb-cta">&#128293; <b>CAN YOU BE #1?</b> Capai <b>ECO LEGEND (7.000+)</b> &rarr; <em>STICKER
+              LIMITED</em> &bull; <b>ECO CHAMPION (11.000+)</b> &rarr; <b>STICKER JUARA</b>!</div>
+          <ol class="lb" id="lb-list"></ol>
+          <div class="btns row"><button class="btn primary" id="lb-back" type="button">KEMBALI</button></div>
+        </div>
+      </section>
 
-    <!-- INFO PLASVORA -->
-    <section class="screen center dim" id="scr-explore" hidden>
-      <div class="card narrow">
-        <h2>PLASVORA</h2>
-        <p class="lead">Recycle &bull; Reuse &bull; Reimagine</p>
-        <p class="small">Tanyakan ke petugas booth untuk mengenal dan memanfaatkan material daur ulang bersama Plasvora.</p>
-        <div class="btns row"><button class="btn primary" id="x-back" type="button">KEMBALI</button></div>
-      </div>
-    </section>
+      <!-- SKOR TERTINGGI BARU -->
+      <section class="screen center champ" id="scr-champ" hidden>
+        <div class="champ-box">
+          <div class="trophy">&#127942;</div>
+          <h2>NEW HIGH SCORE!</h2>
+          <p>YOU ARE THE<br><b>ECO CHAMPION!</b></p>
+          <small>Tekan tombol apa saja untuk lanjut</small>
+        </div>
+      </section>
 
-    <!-- LEADERBOARD -->
-    <section class="screen center" id="scr-lb" hidden>
-      <div class="card wide">
-        <h2>&#127942; TOP ECO RUNNERS</h2>
-        <div class="lb-cta">&#128293; <b>CAN YOU BE #1?</b> Capai <b>ECO LEGEND (7.000+)</b> &rarr; <em>STICKER LIMITED</em> &bull; <b>ECO CHAMPION (11.000+)</b> &rarr; <b>STIKER JUARA</b>!</div>
-        <ol class="lb" id="lb-list"></ol>
-        <div class="btns row"><button class="btn primary" id="lb-back" type="button">KEMBALI</button></div>
-      </div>
-    </section>
-
-    <!-- SKOR TERTINGGI BARU -->
-    <section class="screen center champ" id="scr-champ" hidden>
-      <div class="champ-box">
-        <div class="trophy">&#127942;</div>
-        <h2>NEW HIGH SCORE!</h2>
-        <p>YOU ARE THE<br><b>ECO CHAMPION!</b></p>
-        <small>Tekan tombol apa saja untuk lanjut</small>
-      </div>
-    </section>
-
+    </div>
   </div>
-</div>
-<script src="dist/plasvora-eco-runner.js"></script>
+  <script src="dist/plasvora-eco-runner.js"></script>
 </body>
+
 </html>

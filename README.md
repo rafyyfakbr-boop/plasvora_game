@@ -17,7 +17,7 @@ Game booth 3D side-scroller. Berjalan offline, tanpa internet dan tanpa server.
 | ECO HERO | 1.000+ | Progress | — | — |
 | ECO GUARDIAN | 2.500+ | Progress | — | — |
 | **🟢 ECO LEGEND** | **7.000+** | **STICKER LIMITED** | `LIMITED` | `5 / 5` |
-| **🏆 ECO CHAMPION** | **11.000+** | **STIKER JUARA** | `STIKER JUARA` | `1 / 1` |
+| **🏆 ECO CHAMPION** | **11.000+** | **STICKER JUARA** | `STICKER JUARA` | `1 / 1` |
 
 ## Admin Booth & Mode Manual (Terminal)
 - Panel admin di dalam game: **SETTINGS > ADMIN**, PIN awal `1234` (`ADMIN_PIN` di `js/config.js`).
@@ -31,7 +31,7 @@ Game booth 3D side-scroller. Berjalan offline, tanpa internet dan tanpa server.
   - `npm run admin:set-score legend 7000`
   - `npm run admin:set-score champion 11000`
   - `npm run admin:set-reward legend "STICKER LIMITED"`
-  - `npm run admin:set-reward champion "STIKER JUARA"`
+  - `npm run admin:set-reward champion "STICKER JUARA"`
   - `npm run admin:reset-stock` — reset stok hadiah booth (butuh konfirmasi)
   - `npm run admin:reset-claims` — reset riwayat klaim (butuh konfirmasi)
   - `npm run admin:reset-leaderboard` — reset leaderboard (butuh konfirmasi)

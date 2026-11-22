@@ -154,7 +154,7 @@ export function createGame() {
         const isChamp = r.id === 'champion';
         const isLegend = r.id === 'legend';
         const sub = isChamp
-          ? '👑 STIKER JUARA TERBUKA!'
+          ? '👑 STICKER JUARA TERBUKA!'
           : isLegend
             ? '🎁 STICKER LIMITED TERBUKA!'
             : 'KEJAR ECO LEGEND (' + C.REWARDS.legend.minScore.toLocaleString('id-ID') + ')';
