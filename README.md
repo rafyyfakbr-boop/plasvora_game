@@ -16,8 +16,8 @@ Game booth 3D side-scroller. Berjalan offline, tanpa internet dan tanpa server.
 | ECO ROOKIE | 0+ | Progress | — | — |
 | ECO HERO | 1.000+ | Progress | — | — |
 | ECO GUARDIAN | 2.500+ | Progress | — | — |
-| **🟢 ECO LEGEND** | **7.000+** | **STICKER LIMITED** | `LIMITED` | `5 / 5` |
-| **🏆 ECO CHAMPION** | **11.000+** | **STICKER JUARA** | `STICKER JUARA` | `1 / 1` |
+| **🟢 ECO LEGEND** | **7.000+** | **1 STICKER** | `1 STICKER` | `10 / 10` |
+| **🏆 ECO CHAMPION** | **11.000+** | **2 STICKER** | `2 STICKER` | `6 / 6` |
 
 ## Admin Booth & Mode Manual (Terminal)
 - Panel admin di dalam game: **SETTINGS > ADMIN**, PIN awal `1234` (`ADMIN_PIN` di `js/config.js`).
@@ -26,12 +26,12 @@ Game booth 3D side-scroller. Berjalan offline, tanpa internet dan tanpa server.
 - **Admin Manual Mode (Terminal):** perubahan manual dilakukan secara sadar oleh admin dan setiap command ubah/reset meminta konfirmasi manual (`YA`) sebelum mengubah data booth:
   - `npm run admin` — tampilkan panduan & daftar command (read-only)
   - `npm run admin:status` — lihat konfigurasi 2 hadiah booth & stok default (read-only)
-  - `npm run admin:set-stock legend 5`
-  - `npm run admin:set-stock champion 1`
+  - `npm run admin:set-stock legend 10`
+  - `npm run admin:set-stock champion 6`
   - `npm run admin:set-score legend 7000`
   - `npm run admin:set-score champion 11000`
-  - `npm run admin:set-reward legend "STICKER LIMITED"`
-  - `npm run admin:set-reward champion "STICKER JUARA"`
+  - `npm run admin:set-reward legend "1 STICKER"`
+  - `npm run admin:set-reward champion "2 STICKER"`
   - `npm run admin:reset-stock` — reset stok hadiah booth (butuh konfirmasi)
   - `npm run admin:reset-claims` — reset riwayat klaim (butuh konfirmasi)
   - `npm run admin:reset-leaderboard` — reset leaderboard (butuh konfirmasi)

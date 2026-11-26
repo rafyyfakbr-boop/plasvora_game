@@ -21,17 +21,17 @@ export const BOOTH_CONFIG = {
       "minScore": 7000,
       "stock": 10,
       "rank": "ECO LEGEND",
-      "prize": "STICKER LIMITED",
-      "fullPrize": "STICKER LIMITED",
-      "badge": "LIMITED"
+      "prize": "1 STICKER",
+      "fullPrize": "1 STICKER",
+      "badge": "1 STICKER"
     },
     "champion": {
       "minScore": 11000,
       "stock": 6,
       "rank": "ECO CHAMPION",
-      "prize": "STICKER JUARA",
-      "fullPrize": "STICKER JUARA",
-      "badge": "STICKER JUARA"
+      "prize": "2 STICKER",
+      "fullPrize": "2 STICKER",
+      "badge": "2 STICKER"
     }
   }
 };
