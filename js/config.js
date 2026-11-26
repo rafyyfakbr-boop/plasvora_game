@@ -83,6 +83,18 @@ export const C = {
 
   SPEED: { MIN: 1.0, MAX: 1.8 },
 
+  // Mode hampir mustahil saat skor mencapai 15.000+ (kecepatan, combo 3-4 obstacle, dan boss makin brutal)
+  OVERDRIVE: {
+    SCORE_START: 15000,
+    SCORE_STEP: 2500,
+    SPEED_MIN: 2.05,
+    SPEED_MAX: 2.85,
+    MAX_TOTAL_SPEED_MULT: 3.10,
+    BOSS_GAP_MIN: 850,
+    BOSS_GAP_MAX: 1350,
+    THEME: { id: 6, name: 'IMPOSSIBLE', bg: 0x26030a, hemi: 0xff6b88, edge: 0xff1e4d }
+  },
+
   // Skor terkontrol agar ECO LEGEND (5.000+) & ECO CHAMPION (8.000+) benar-benar menuntut skill, combo tinggi, dan konsistensi.
   SCORE: {
     normal: 50,        // Plastic
@@ -228,8 +240,17 @@ export function phaseAt(distance) {
   return ps[0];
 }
 
-// Kecepatan meningkat bertahap berdasarkan jarak tempuh (halus di setiap fase).
-export function speedMultAt(distance) {
+export function overdriveLevel(score) {
+  if (!score || score < C.OVERDRIVE.SCORE_START) return 0;
+  return 1 + (score - C.OVERDRIVE.SCORE_START) / C.OVERDRIVE.SCORE_STEP;
+}
+
+// Kecepatan meningkat bertahap berdasarkan jarak tempuh; saat skor >= 15.000 masuk OVERDRIVE ekstrem.
+export function speedMultAt(distance, score = 0) {
+  const od = overdriveLevel(score);
+  if (od > 0) {
+    return Math.min(C.OVERDRIVE.SPEED_MAX, C.OVERDRIVE.SPEED_MIN + (od - 1) * 0.22);
+  }
   const p = phaseAt(distance);
   const span = Math.max(1, p.maxDist - p.minDist);
   const t = Math.max(0, Math.min(1, (distance - p.minDist) / span));

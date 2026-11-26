@@ -1,6 +1,6 @@
 // loot.js - Procedural Run Director berbasis jarak (Phase 1..5), kombinasi rintangan fair,
 // loot acak per game, power-up berbobot dengan safe pickup window, dan Eco Boss acak.
-import { C, phaseAt, OBSTACLE_DEFS } from './config.js';
+import { C, phaseAt, overdriveLevel, OBSTACLE_DEFS } from './config.js';
 import { RNG, clamp, lerp } from './util.js';
 
 // Daftar obstacle per tingkat kesulitan (semua pakai weighted random, tidak pernah urutan statis)
@@ -51,6 +51,16 @@ const COMBOS = {
     ['bin', 'lowBeam', 'car'],
     ['hole', 'pipe', 'trashPile'],
     ['cone', 'lowBeam', 'dumpster']
+  ],
+  impossible: [
+    ['dumpster', 'lowBeam', 'dumpster'],
+    ['lowBeam', 'car', 'lowBeam'],
+    ['hole', 'lowBeam', 'dumpster', 'pipe'],
+    ['cone', 'dumpster', 'lowBeam', 'car'],
+    ['trashPile', 'lowBeam', 'dumpster', 'lowBeam'],
+    ['lowBeam', 'dumpster', 'pipe', 'car'],
+    ['dumpster', 'hole', 'lowBeam', 'dumpster'],
+    ['car', 'lowBeam', 'trashPile', 'dumpster']
   ]
 };
 
@@ -93,34 +103,48 @@ const BOSS_PATTERNS = {
 
 // Menghitung jarak aman sisi-ke-sisi (edge-to-edge, unit 3D) antar dua obstacle
 // berdasarkan fisika lompatan (JUMP_V=19, GRAVITY=50, airtime ~0.76s) & slide agar 100% bisa dihindari.
-export function safeEdgeGap(prevKind, nextKind, speed, phaseId, bossDiff) {
+export function safeEdgeGap(prevKind, nextKind, speed, phaseId, bossDiff, overdriveLv = 0) {
   const a = OBSTACLE_DEFS[prevKind];
   const b = OBSTACLE_DEFS[nextKind];
   const wA = a ? a.hitW : 1.5;
   const needA = a ? a.need : 'jump';
   const needB = b ? b.need : 'jump';
 
-  // Waktu reaksi/pulih di tanah menurun bertahap seiring fase, namun selalu >= batas manusiawi
+  // Waktu reaksi/pulih di tanah menurun bertahap; di OVERDRIVE (15.000+) menyempit drastis jadi sangat brutal
   const reactByPhase = [0.46, 0.38, 0.31, 0.25, 0.20];
   let tReact = reactByPhase[clamp((phaseId || 1) - 1, 0, 4)];
   if (bossDiff === 'hard') tReact = Math.max(0.18, tReact - 0.03);
   else if (bossDiff === 'ultimate') tReact = Math.max(0.17, tReact - 0.04);
 
+  if (overdriveLv > 0) {
+    // Makin tinggi skor di atas 15.000, celah makin brutal & menuntut fast-fall + refleks milidetik
+    tReact = Math.max(0.02, 0.11 - (overdriveLv - 1) * 0.035);
+    const tight = clamp((overdriveLv - 1) * 0.08, 0, 0.22);
+    if (needA === 'jump' && needB === 'jump') {
+      const landPastA = Math.max(0.12 * speed, (0.50 - tight) * speed - wA);
+      return landPastA + (tReact + 0.08) * speed + 0.4;
+    }
+    if (needA === 'jump' && needB === 'slide') {
+      const landPastA = Math.max(0.10 * speed, (0.44 - tight) * speed - wA);
+      return landPastA + (tReact + 0.07) * speed + 0.35;
+    }
+    if (needA === 'slide' && needB === 'jump') {
+      return (tReact + 0.14) * speed + 0.55;
+    }
+    return (tReact + 0.18) * speed + 0.55;
+  }
+
   if (needA === 'jump' && needB === 'jump') {
-    // Jarak mendarat setelah tepi kanan A = max(0, 0.64*v - wA) + waktu reaksi + jarak lepas landas sebelum B
     const landPastA = Math.max(0.18 * speed, 0.64 * speed - wA);
     return landPastA + (tReact + 0.14) * speed + 0.9;
   }
   if (needA === 'jump' && needB === 'slide') {
-    // Pemain bisa fast-fall langsung ke slide saat mendarat
     const landPastA = Math.max(0.16 * speed, 0.58 * speed - wA);
     return landPastA + (tReact * 0.8 + 0.12) * speed + 0.85;
   }
   if (needA === 'slide' && needB === 'jump') {
-    // Pemain bisa langsung melompat keluar dari slide (0ms delay), butuh jarak visual & lepas landas
     return (tReact + 0.24) * speed + 1.1;
   }
-  // slide -> slide
   return (tReact + 0.30) * speed + 1.1;
 }
 
@@ -151,15 +175,17 @@ export class LootDirector {
 
   // Dipanggil dari game loop saat PLAYING untuk mengecek apakah Eco Boss muncul secara acak
   checkBossTrigger(distance, score, comboLevel) {
+    const od = overdriveLevel(score);
     if (distance < this.nextBossDist) return null;
 
-    // Peluang acak dipengaruhi sedikit oleh combo & jarak agar tidak terasa mekanis
-    const baseProb = 0.86;
-    const comboBoost = comboLevel >= 4 ? 0.08 : 0;
-    if (this.rng.next() > Math.min(0.96, baseProb + comboBoost)) {
-      // Kadang jendela boss bergeser/dilewati agar tiap game tidak selalu sama
-      this.nextBossDist = Math.round(distance + this.rng.range(900, 1600));
-      return null;
+    // Di Overdrive (15.000+), boss tidak pernah di-skip
+    if (od <= 0) {
+      const baseProb = 0.86;
+      const comboBoost = comboLevel >= 4 ? 0.08 : 0;
+      if (this.rng.next() > Math.min(0.96, baseProb + comboBoost)) {
+        this.nextBossDist = Math.round(distance + this.rng.range(900, 1600));
+        return null;
+      }
     }
 
     // Pilih varian acak (tidak mengulang varian yang sama berturut-turut, beri sedikit bias profil run di boss pertama)
@@ -173,14 +199,16 @@ export class LootDirector {
     const variantId = this.rng.weighted(vWeights);
     this.lastBossVariant = variantId;
 
-    // Pilih tingkat kesulitan boss secara acak berdasarkan jarak/fase + combo
+    // Pilih tingkat kesulitan boss secara acak (di Overdrive 15.000+ hanya HARD / ULTIMATE)
     const phase = phaseAt(distance).id;
-    const dWeights = phase <= 3
-      ? { easy: 30, normal: 44, hard: 21, ultimate: 5 }
-      : phase === 4
-        ? { easy: 14, normal: 36, hard: 38, ultimate: 12 }
-        : { easy: 6,  normal: 24, hard: 48, ultimate: 22 };
-    if (comboLevel >= 5) dWeights.hard += 8;
+    const dWeights = od > 0
+      ? { easy: 0, normal: 0, hard: 30, ultimate: 70 }
+      : phase <= 3
+        ? { easy: 30, normal: 44, hard: 21, ultimate: 5 }
+        : phase === 4
+          ? { easy: 14, normal: 36, hard: 38, ultimate: 12 }
+          : { easy: 6,  normal: 24, hard: 48, ultimate: 22 };
+    if (od <= 0 && comboLevel >= 5) dWeights.hard += 8;
     const diffId = this.rng.weighted(dWeights);
 
     const variant = C.BOSS.VARIANTS[variantId];
@@ -188,8 +216,10 @@ export class LootDirector {
     const duration = Math.round(this.rng.range(diff.timeMin, diff.timeMax));
 
     this.bossCount++;
-    // Jadwalkan jendela boss berikutnya secara acak (5.000-7.000 untuk boss kedua, dst)
-    if (this.bossCount === 1) {
+    // Jadwalkan jendela boss berikutnya (di Overdrive jauh lebih rapat: 850-1.350m)
+    if (od > 0) {
+      this.nextBossDist = Math.round(distance + this.rng.range(C.OVERDRIVE.BOSS_GAP_MIN, C.OVERDRIVE.BOSS_GAP_MAX));
+    } else if (this.bossCount === 1) {
       this.nextBossDist = Math.round(Math.max(distance + 1700, this.rng.range(C.BOSS.SECOND_MIN_DIST, C.BOSS.SECOND_MAX_DIST)));
     } else {
       this.nextBossDist = Math.round(distance + this.rng.range(C.BOSS.NEXT_GAP_MIN, C.BOSS.NEXT_GAP_MAX));
@@ -198,16 +228,17 @@ export class LootDirector {
     return { variant, diff, duration };
   }
 
-  pickObstacleKind(phase, bossVariantId) {
+  pickObstacleKind(phase, bossVariantId, overdriveLv = 0) {
     const rng = this.rng;
     let pool;
-    if (bossVariantId && BOSS_PATTERNS[bossVariantId]) {
+    if (overdriveLv > 0) {
+      pool = { ...OBS_BY_TIER.hard };
+    } else if (bossVariantId && BOSS_PATTERNS[bossVariantId]) {
       pool = { ...BOSS_PATTERNS[bossVariantId].singles };
     } else {
       const tier = rng.weighted(phase.obsTierWeights);
       pool = { ...OBS_BY_TIER[tier] };
     }
-    // Terapkan bias profil permainan (jump vs slide) + kurangi pengulangan obstacle terakhir
     for (const k in pool) {
       const def = OBSTACLE_DEFS[k];
       if (def) pool[k] *= this.profile.obsBias[def.need] || 1;
@@ -218,10 +249,12 @@ export class LootDirector {
     return kind;
   }
 
-  pickCombo(phase, bossVariantId, bossDiffId) {
+  pickCombo(phase, bossVariantId, bossDiffId, overdriveLv = 0) {
     const rng = this.rng;
     let list;
-    if (bossVariantId && BOSS_PATTERNS[bossVariantId]) {
+    if (overdriveLv > 0) {
+      list = rng.chance(0.82) ? COMBOS.impossible : COMBOS.hard;
+    } else if (bossVariantId && BOSS_PATTERNS[bossVariantId]) {
       list = BOSS_PATTERNS[bossVariantId].combos;
       if (bossDiffId === 'easy') list = list.filter((c) => c.length === 2);
     } else {
@@ -238,7 +271,6 @@ export class LootDirector {
     }
     if (!list.length) list = COMBOS.easy;
 
-    // Hindari kombinasi identik muncul dua kali berturut-turut
     let picked = rng.pick(list);
     let key = picked.join('>');
     if (key === this.lastComboKey && list.length > 1) {
@@ -264,41 +296,45 @@ export class LootDirector {
     return tier;
   }
 
-  pickPowerKind() {
+  pickPowerKind(overdriveLv = 0) {
     const w = { ...C.LOOT.POWER_WEIGHTS };
     for (const k in w) w[k] *= this.profile.powerBias[k] || 1;
+    // Di Overdrive 15.000+, tidak ada Shield gratis agar tidak bisa bertahan selamanya
+    if (overdriveLv > 0) w.shield = 0;
     return this.rng.weighted(w);
   }
 
-  // ctx: { dist, speed, boss, bossVariant, bossDiff, t }
+  // ctx: { dist, score, speed, boss, bossVariant, bossDiff, t }
   next(ctx, dtSinceLast) {
     const L = C.LOOT, rng = this.rng;
     const dist = ctx.dist || 0;
     const speed = ctx.speed || C.WORLD.BASE_SPEED;
     const phase = phaseAt(dist);
+    const od = overdriveLevel(ctx.score || 0);
     const inBoss = !!ctx.boss;
     const bossDiff = inBoss ? C.BOSS.DIFFICULTIES[ctx.bossDiff] : null;
 
     this.sincePower += dtSinceLast;
 
-    // Bobot tipe slot berdasarkan fase & boss
-    const w = { ...phase.slotWeights };
-    if (inBoss) {
+    // Bobot tipe slot berdasarkan fase, boss, & Overdrive 15.000+
+    const w = od > 0
+      ? { obstacle: 88, loot: 10, power: 2 }
+      : { ...phase.slotWeights };
+    if (inBoss && od <= 0) {
       w.obstacle = 68;
       w.loot = 27;
       w.power = 5;
     }
 
-    // Aturan anti-frustrasi & fairness
+    // Aturan anti-frustrasi & fairness (di Overdrive jadi gelombang rintangan tanpa ampun)
     let forcedSafe = false;
     if (this.slot < L.INTRO_SLOTS) {
       w.obstacle = 0; w.power = 0; forcedSafe = true;
     }
-    const maxConsec = inBoss ? 3 : (phase.id >= 2 ? 2 : 1);
+    const maxConsec = od > 0 ? 5 : inBoss ? 3 : (phase.id >= 2 ? 2 : 1);
     if (this.consecObs >= maxConsec) {
       w.obstacle = 0; forcedSafe = true;
     }
-    // Power-up hanya muncul setelah jarak minimum, cooldown acak selesai, & tidak langsung setelah obstacle berat
     if (dist < L.POWER_MIN_DIST || this.sincePower < this.nextPowerCd || this.prevWasPower) {
       w.power = 0;
     }
@@ -307,43 +343,47 @@ export class LootDirector {
     this.slot++;
 
     const progressInPhase = clamp((dist - phase.minDist) / Math.max(1, phase.maxDist - phase.minDist), 0, 1);
-    let baseGap = lerp(phase.gapMax, phase.gapMin, progressInPhase) * rng.range(0.88, 1.14);
+    let baseGap = od > 0
+      ? lerp(0.56, 0.34, clamp((od - 1) / 3, 0, 1)) * rng.range(0.85, 1.06)
+      : lerp(phase.gapMax, phase.gapMin, progressInPhase) * rng.range(0.88, 1.14);
     if (inBoss && bossDiff) baseGap *= bossDiff.gapMult;
 
     let out;
 
     if (pick === 'obstacle') {
-      const comboChance = inBoss && bossDiff ? bossDiff.comboChance : phase.comboChance;
+      const comboChance = od > 0
+        ? Math.min(0.96, 0.86 + (od - 1) * 0.04)
+        : (inBoss && bossDiff ? bossDiff.comboChance : phase.comboChance);
       const doCombo = comboChance > 0 && rng.chance(comboChance);
 
       if (doCombo) {
-        const kinds = this.pickCombo(phase, inBoss ? ctx.bossVariant : null, ctx.bossDiff);
+        const kinds = this.pickCombo(phase, inBoss ? ctx.bossVariant : null, ctx.bossDiff, od);
         const items = [];
         for (let i = 0; i < kinds.length; i++) {
           const kind = kinds[i];
-          const edgeGap = i === 0 ? 0 : safeEdgeGap(kinds[i - 1], kind, speed, phase.id, ctx.bossDiff) * rng.range(1.0, 1.15);
-          // Sebagian obstacle membawa loot berisiko di busur lompat (risk/reward)
+          const edgeGap = i === 0 ? 0 : safeEdgeGap(kinds[i - 1], kind, speed, phase.id, ctx.bossDiff, od) * rng.range(1.0, od > 0 ? 1.06 : 1.15);
           const arc = OBSTACLE_DEFS[kind].need === 'jump' && rng.chance(0.16) ? this.pickLootTier(phase, true) : null;
           items.push({ kind, edgeGap, arc });
         }
         out = { type: 'combo', items };
-        this.consecObs += 2; // Setelah combo selalu ada ruang napas/loot
-        out.gapAfter = Math.max(baseGap * 1.08, L.MIN_RECOVERY_AFTER_COMBO * (phase.id >= 4 ? 0.92 : 1.0));
+        this.consecObs += od > 0 ? 1 : 2;
+        out.gapAfter = od > 0
+          ? Math.max(baseGap, 0.62 - Math.min(0.22, (od - 1) * 0.08))
+          : Math.max(baseGap * 1.08, L.MIN_RECOVERY_AFTER_COMBO * (phase.id >= 4 ? 0.92 : 1.0));
       } else {
-        const kind = this.pickObstacleKind(phase, inBoss ? ctx.bossVariant : null);
+        const kind = this.pickObstacleKind(phase, inBoss ? ctx.bossVariant : null, od);
         const need = OBSTACLE_DEFS[kind].need;
         const arc = need === 'jump' && rng.chance(0.18) ? this.pickLootTier(phase, true) : null;
         const slideBonus = need === 'slide' && rng.chance(0.42) ? this.pickLootTier(phase, true) : null;
         out = { type: 'obstacle', kind, arc, slideBonus };
         this.consecObs++;
-        // Pastikan jarak aman menuju slot berikutnya (terutama jika berikutnya juga obstacle)
-        const minAfter = safeEdgeGap(kind, kind, speed, phase.id, ctx.bossDiff) / speed;
+        const minAfter = safeEdgeGap(kind, kind, speed, phase.id, ctx.bossDiff, od) / speed;
         out.gapAfter = Math.max(baseGap, minAfter);
       }
       this.prevWasObstacle = true;
       this.prevWasPower = false;
     } else if (pick === 'power') {
-      out = { type: 'power', kind: this.pickPowerKind() };
+      out = { type: 'power', kind: this.pickPowerKind(od) };
       this.sincePower = 0;
       this.nextPowerCd = rng.range(L.POWER_CD_MIN, L.POWER_CD_MAX);
       this.consecObs = 0;

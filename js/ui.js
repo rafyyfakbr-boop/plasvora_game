@@ -91,7 +91,7 @@ function setHud(d) {
   setText('h-speed', d.speed.toFixed(2));
 
   if (d.phase) {
-    const pTxt = 'P' + d.phase.id + ' • ' + d.phase.name;
+    const pTxt = d.phase.id === 6 ? '⚡ OVERDRIVE • IMPOSSIBLE' : ('P' + d.phase.id + ' • ' + d.phase.name);
     setText('h-phase', pTxt);
     const phEl = $('h-phase');
     const pCls = 'phase-pill p' + d.phase.id;

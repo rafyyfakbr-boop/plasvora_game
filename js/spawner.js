@@ -24,7 +24,7 @@ export class Spawner {
     this.obstacles = []; this.loot = []; this.powers = [];
     this.obsPools = {}; this.lootPools = {}; this.powerPools = {};
 
-    for (const k in OBSTACLE_DEFS) this.obsPools[k] = new Pool(() => createObstacle(k), 6, this.group);
+    for (const k in OBSTACLE_DEFS) this.obsPools[k] = new Pool(() => createObstacle(k), 10, this.group);
     for (const [tier, n] of [['normal', 10], ['recycled', 6], ['rare', 5], ['gold', 4]]) {
       for (let v = 0; v < 3; v++) this.lootPools[tier + v] = new Pool(() => createLoot(tier, v), n, this.group);
     }

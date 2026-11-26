@@ -1,6 +1,6 @@
 // game.js - inti permainan: renderer, state machine, loop, fase jarak, tabrakan, boss acak, game over, hadiah
 import * as THREE from 'three';
-import { C, rankFor, tierProgress, phaseAt, speedMultAt } from './config.js';
+import { C, rankFor, tierProgress, phaseAt, overdriveLevel, speedMultAt } from './config.js';
 import { STATE } from './states.js';
 import { World } from './world.js';
 import { Player } from './player.js';
@@ -40,7 +40,7 @@ export function createGame() {
   const g = {
     state: STATE.MENU, prev: STATE.MENU, returnTo: 'menu',
     t: 0, lives: C.LIVES, seed: 0, name: 'PLAYER', high: 0,
-    speedMult: 1, curSpeed: 0, phaseId: 1, rankId: C.RANK_BASE.id,
+    speedMult: 1, curSpeed: 0, phaseId: 1, rankId: C.RANK_BASE.id, overdrive: false,
     boss: { active: false, left: 0, total: 0, variant: null, diff: null },
     cdT: 0, cdN: 4, overT: 0, tagT: 0, pauseCd: 0, last: null, res: null, tNow: 0, hint: 0
   };
@@ -71,7 +71,7 @@ export function createGame() {
     g.name = (String(name || '').trim().toUpperCase().slice(0, 10)) || 'PLAYER';
     g.seed = newSeed();
     spawner.reset(g.seed); score.reset(); player.reset(); fx.reset(); bossEntity.hide();
-    g.t = 0; g.lives = C.LIVES; g.phaseId = 1; g.rankId = C.RANK_BASE.id;
+    g.t = 0; g.lives = C.LIVES; g.phaseId = 1; g.rankId = C.RANK_BASE.id; g.overdrive = false;
     g.boss = { active: false, left: 0, total: 0, variant: null, diff: null };
     g.speedMult = 1; g.curSpeed = W.BASE_SPEED; g.high = Leaderboard.best(); g.res = null; g.hint = 7;
     world.bossF = 0;
@@ -126,7 +126,7 @@ export function createGame() {
     setState(STATE.PLAYING);
     const p = score.addBonus(diff.bonus, false);
     player.comboGuard = Math.max(player.comboGuard, diff.comboGuard);
-    if (diff.grantShield && !player.shield) player.shield = true;
+    if (diff.grantShield && !player.shield && !g.overdrive) player.shield = true;
     spawner.spawnBossReward(diff, spawner.director.rng);
     UI.bumpScore();
     const subParts = ['+' + p + ' BONUS', 'COMBO GUARD'];
@@ -144,6 +144,19 @@ export function createGame() {
       const cls = phase.id >= 5 ? 'boss' : phase.id >= 4 ? 'gold' : 'cyan';
       UI.feedback.push({ text: 'PHASE ' + phase.id + ' • ' + phase.name, sub: 'SPEED ' + phase.speedMin.toFixed(2) + 'x+', cls, dur: 1.7, prio: 5 });
       Sound.combo(Math.min(7, phase.id));
+    }
+
+    // Transisi ke OVERDRIVE / IMPOSSIBLE MODE saat skor menembus 15.000+
+    if (!g.overdrive && score.score >= C.OVERDRIVE.SCORE_START) {
+      g.overdrive = true;
+      spawner.director.nextBossDist = Math.min(spawner.director.nextBossDist, Math.round(score.meters + 450));
+      UI.feedback.push({
+        text: '⚠ OVERDRIVE 15.000!',
+        sub: 'IMPOSSIBLE MODE • KECEPATAN EKSTREM!',
+        cls: 'boss', dur: 2.6, prio: 9
+      });
+      Sound.boss();
+      fx.shake(0.35, 0.6); fx.flash('#ff1e4d', 0.45);
     }
 
     // Pengumuman pencapaian tier baru (progress ranks vs 2 reward ranks)
@@ -340,7 +353,7 @@ export function createGame() {
   }
 
   function hud() {
-    const phase = phaseAt(score.meters);
+    const phase = g.overdrive ? C.OVERDRIVE.THEME : phaseAt(score.meters);
     const tier = tierProgress(score.score);
     const warn = inRun() ? spawner.upcomingWarning(player.x) : null;
     UI.setHud({
@@ -371,11 +384,13 @@ export function createGame() {
         if (g.pauseCd > 0) Input.takePause();
         const gdt = rdt * fx.timeScale();
         g.t += gdt; if (g.hint > 0) g.hint -= gdt;
-        g.speedMult = speedMultAt(score.meters);
+        const odLv = overdriveLevel(score.score);
+        g.speedMult = speedMultAt(score.meters, score.score);
         const bossMult = g.boss.active && g.boss.diff ? g.boss.diff.speedMult : 1;
-        const totalMult = Math.min(C.BOSS.MAX_TOTAL_SPEED_MULT, g.speedMult * bossMult) * (player.speed > 0 ? 1.32 : 1);
+        const maxTotal = odLv > 0 ? C.OVERDRIVE.MAX_TOTAL_SPEED_MULT : C.BOSS.MAX_TOTAL_SPEED_MULT;
+        const totalMult = Math.min(maxTotal, g.speedMult * bossMult) * (player.speed > 0 ? 1.32 : 1);
         const target = W.BASE_SPEED * totalMult;
-        g.curSpeed += (target - g.curSpeed) * Math.min(1, gdt * 3.8);
+        g.curSpeed += (target - g.curSpeed) * Math.min(1, gdt * (odLv > 0 ? 5.2 : 3.8));
         const dx = g.curSpeed * gdt;
         speedF = g.curSpeed / W.BASE_SPEED;
 
@@ -386,7 +401,7 @@ export function createGame() {
 
         score.addDistance(dx, player.boost > 0, player.speed > 0);
         spawner.update(gdt, dx, {
-          dist: score.meters, t: g.t, speed: g.curSpeed,
+          dist: score.meters, score: score.score, t: g.t, speed: g.curSpeed,
           boss: g.boss.active,
           bossVariant: g.boss.variant ? g.boss.variant.id : null,
           bossDiff: g.boss.diff ? g.boss.diff.id : null
@@ -404,9 +419,9 @@ export function createGame() {
             if (g.boss.left <= 0) endBoss();
           }
           bossEntity.update(gdt, g.tNow, g.boss.active);
-          const phase = phaseAt(score.meters);
+          const phase = g.overdrive ? C.OVERDRIVE.THEME : phaseAt(score.meters);
           world.update(gdt, dx, g.boss.active ? g.boss.variant : null, phase);
-          const lineInt = clamp((speedF - 1.08) * 1.15 + (phase.id - 1) * 0.12 + (g.boss.active ? 0.25 : 0) + (player.speed > 0 ? 0.55 : 0), 0, 1.3);
+          const lineInt = clamp((speedF - 1.08) * 1.15 + (phase.id - 1) * 0.12 + (g.boss.active ? 0.25 : 0) + (odLv > 0 ? 0.65 : 0) + (player.speed > 0 ? 0.55 : 0), 0, 1.8);
           fx.update(gdt, rdt, g.curSpeed, lineInt);
           hud();
         }

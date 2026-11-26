@@ -35,6 +35,7 @@ body{display:grid;place-items:center}
 .phase-pill.p3{color:var(--cyan);background:rgba(25,212,255,.12);border-color:rgba(25,212,255,.4)}
 .phase-pill.p4{color:#ffb347;background:rgba(255,179,71,.14);border-color:rgba(255,179,71,.45)}
 .phase-pill.p5{color:#ff6bd6;background:rgba(255,79,216,.15);border-color:rgba(255,79,216,.5)}
+.phase-pill.p6{color:#ff4d6d;background:rgba(255,30,77,.24);border-color:#ff2a55;box-shadow:0 0 .8em rgba(255,30,77,.5);animation:cpulse .7s ease-in-out infinite}
 .combo{font:900 1.05em var(--font);letter-spacing:.06em;color:var(--green)}
 .combo b{color:var(--gold)}
 .combo.pulse{animation:cpulse .4s ease-out}
