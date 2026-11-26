@@ -83,7 +83,7 @@ export const C = {
 
   SPEED: { MIN: 1.0, MAX: 1.8 },
 
-  // Skor terkontrol agar ECO LEGEND (7.000+) & ECO CHAMPION (11.000+) benar-benar menuntut skill, combo tinggi, dan konsistensi.
+  // Skor terkontrol agar ECO LEGEND (5.000+) & ECO CHAMPION (8.000+) benar-benar menuntut skill, combo tinggi, dan konsistensi.
   SCORE: {
     normal: 50,        // Plastic
     recycled: 100,     // Recycled Material

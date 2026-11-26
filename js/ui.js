@@ -16,8 +16,8 @@ const MANUAL_COMMANDS = [
   { cmd: 'npm run admin:status', desc: 'Lihat konfigurasi 2 hadiah booth (ECO LEGEND & ECO CHAMPION) [read-only]', warn: false },
   { cmd: 'npm run admin:set-stock legend 10', desc: 'Atur stok ECO LEGEND (1 STICKER)', warn: false },
   { cmd: 'npm run admin:set-stock champion 6', desc: 'Atur stok ECO CHAMPION (2 STICKER)', warn: false },
-  { cmd: 'npm run admin:set-score legend 7000', desc: 'Ubah skor minimum ECO LEGEND', warn: false },
-  { cmd: 'npm run admin:set-score champion 11000', desc: 'Ubah skor minimum ECO CHAMPION', warn: false },
+  { cmd: 'npm run admin:set-score legend 5000', desc: 'Ubah skor minimum ECO LEGEND', warn: false },
+  { cmd: 'npm run admin:set-score champion 8000', desc: 'Ubah skor minimum ECO CHAMPION', warn: false },
   { cmd: 'npm run admin:set-reward legend "1 STICKER"', desc: 'Ubah nama hadiah ECO LEGEND / ECO CHAMPION', warn: false },
   { cmd: 'npm run admin:reset-stock', desc: 'Reset stok hadiah booth ke angka default (destruktif)', warn: true },
   { cmd: 'npm run admin:reset-claims', desc: 'Reset seluruh riwayat klaim booth (destruktif)', warn: true },
@@ -27,7 +27,7 @@ const MANUAL_COMMANDS = [
 const MENU_CTAS = [
   '🏆 Jadi <b>#1 LEADERBOARD</b> &amp; buktikan kamu adalah <b>ECO CHAMPION!</b>',
   '🔥 <b>CAN YOU BE #1?</b> Kejar skor tertinggi &amp; raih <b>2 STICKER!</b>',
-  '🎁 Capai <b>7.000+</b> untuk <b>1 STICKER</b> &amp; <b>11.000+</b> untuk <b>2 STICKER!</b>'
+  '🎁 Capai <b>5.000+</b> untuk <b>1 STICKER</b> &amp; <b>8.000+</b> untuk <b>2 STICKER!</b>'
 ];
 
 const OVER_CTAS_BELOW_LEGEND = [

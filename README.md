@@ -16,8 +16,8 @@ Game booth 3D side-scroller. Berjalan offline, tanpa internet dan tanpa server.
 | ECO ROOKIE | 0+ | Progress | — | — |
 | ECO HERO | 1.000+ | Progress | — | — |
 | ECO GUARDIAN | 2.500+ | Progress | — | — |
-| **🟢 ECO LEGEND** | **7.000+** | **1 STICKER** | `1 STICKER` | `10 / 10` |
-| **🏆 ECO CHAMPION** | **11.000+** | **2 STICKER** | `2 STICKER` | `6 / 6` |
+| **🟢 ECO LEGEND** | **5.000+** | **1 STICKER** | `1 STICKER` | `10 / 10` |
+| **🏆 ECO CHAMPION** | **8.000+** | **2 STICKER** | `2 STICKER` | `6 / 6` |
 
 ## Admin Booth & Mode Manual (Terminal)
 - Panel admin di dalam game: **SETTINGS > ADMIN**, PIN awal `1234` (`ADMIN_PIN` di `js/config.js`).
@@ -28,8 +28,8 @@ Game booth 3D side-scroller. Berjalan offline, tanpa internet dan tanpa server.
   - `npm run admin:status` — lihat konfigurasi 2 hadiah booth & stok default (read-only)
   - `npm run admin:set-stock legend 10`
   - `npm run admin:set-stock champion 6`
-  - `npm run admin:set-score legend 7000`
-  - `npm run admin:set-score champion 11000`
+  - `npm run admin:set-score legend 5000`
+  - `npm run admin:set-score champion 8000`
   - `npm run admin:set-reward legend "1 STICKER"`
   - `npm run admin:set-reward champion "2 STICKER"`
   - `npm run admin:reset-stock` — reset stok hadiah booth (butuh konfirmasi)

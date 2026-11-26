@@ -18,7 +18,7 @@ export const BOOTH_CONFIG = {
   },
   "rewards": {
     "legend": {
-      "minScore": 7000,
+      "minScore": 5000,
       "stock": 10,
       "rank": "ECO LEGEND",
       "prize": "1 STICKER",
@@ -26,7 +26,7 @@ export const BOOTH_CONFIG = {
       "badge": "1 STICKER"
     },
     "champion": {
-      "minScore": 11000,
+      "minScore": 8000,
       "stock": 6,
       "rank": "ECO CHAMPION",
       "prize": "2 STICKER",
